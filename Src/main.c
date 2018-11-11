@@ -54,7 +54,14 @@
 #include "gpio.h"
 
 /* USER CODE BEGIN Includes */
+#include "usbh_def.h"
+#include "stm32f4xx.h"
 
+#include "usbh_core.h"
+#include "usbh_hid.h"
+#include "usbh_hub.h"
+
+#include "log.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -72,7 +79,10 @@ void MX_USB_HOST_Process(void);
 /* Private function prototypes -----------------------------------------------*/
 
 /* USER CODE END PFP */
+USBH_HandleTypeDef hUSBHost[5];
 
+static void USBH_UserProcess (USBH_HandleTypeDef *pHost, uint8_t vId);
+static void hub_process();
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
@@ -83,6 +93,8 @@ void MX_USB_HOST_Process(void);
   * @retval None
   */
 int main(void)
+
+
 {
   /* USER CODE BEGIN 1 */
 
@@ -107,8 +119,26 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART3_UART_Init();
-  MX_USB_HOST_Init();
+  //MX_USB_HOST_Init();
   /* USER CODE BEGIN 2 */
+  LOG_INIT(USART3, 115200);
+
+  	//LOG("\033[2J\033[H");
+  	//LOG(" ");
+  	LOG("APP RUNNING...");
+  	LOG("MCU-ID %08X", DBGMCU->IDCODE);
+
+  	memset(&hUSBHost[0], 0, sizeof(USBH_HandleTypeDef));
+
+  	hUSBHost[0].valid   = 1;
+  	hUSBHost[0].address = USBH_DEVICE_ADDRESS;
+  	hUSBHost[0].Pipes   = USBH_malloc(sizeof(uint32_t) * USBH_MAX_PIPES_NBR);
+
+  	USBH_Init(&hUSBHost[0], USBH_UserProcess, ID_USB_HOST_FS);
+  	USBH_RegisterClass(&hUSBHost[0], USBH_HID_CLASS);
+  	USBH_RegisterClass(&hUSBHost[0], USBH_HUB_CLASS);
+
+  	USBH_Start(&hUSBHost[0]);
 
   /* USER CODE END 2 */
 
@@ -118,8 +148,8 @@ int main(void)
   {
 
   /* USER CODE END WHILE */
-    MX_USB_HOST_Process();
-
+    //MX_USB_HOST_Process();
+    hub_process();
   /* USER CODE BEGIN 3 */
 
   }
@@ -194,6 +224,89 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+void hub_process()
+{
+	static uint8_t current_loop = -1;
+	static USBH_HandleTypeDef *_phost = 0;
+
+	if(_phost != NULL && _phost->valid == 1)
+	{
+		USBH_Process(_phost);
+
+		if(_phost->busy)
+			return;
+	}
+
+	while(1)
+	{
+		current_loop++;
+
+		if(current_loop > MAX_HUB_PORTS)
+			current_loop = 0;
+
+		if(hUSBHost[current_loop].valid)
+		{
+			_phost = &hUSBHost[current_loop];
+			USBH_LL_SetupEP0(_phost);
+
+			if(_phost->valid == 3)
+			{
+LOG("PROCESSING ATTACH %d", _phost->address);
+				_phost->valid = 1;
+				_phost->busy  = 1;
+			}
+
+			break;
+		}
+	}
+
+	if(_phost != NULL && _phost->valid)
+	{
+		HID_MOUSE_Info_TypeDef *minfo;
+		minfo = USBH_HID_GetMouseInfo(_phost);
+		if(minfo != NULL)
+		{
+LOG("BUTTON %d", minfo->buttons[0]);
+		}
+		else
+		{
+			HID_KEYBD_Info_TypeDef *kinfo;
+			kinfo = USBH_HID_GetKeybdInfo(_phost);
+			if(kinfo != NULL)
+			{
+LOG("KEYB %d", kinfo->keys[0]);
+			}
+		}
+	}
+
+}
+
+void USBH_UserProcess (USBH_HandleTypeDef *pHost, uint8_t vId)
+{
+	switch (vId)
+	{
+		case HOST_USER_SELECT_CONFIGURATION:
+			break;
+
+		case HOST_USER_CLASS_SELECTED:
+			break;
+
+		case HOST_USER_CLASS_ACTIVE:
+			break;
+
+		case HOST_USER_CONNECTION:
+			break;
+
+		case HOST_USER_DISCONNECTION:
+			break;
+
+		case HOST_USER_UNRECOVERED_ERROR:
+			break;
+
+		default:
+			break;
+	}
+}
 
 /* USER CODE END 4 */
 

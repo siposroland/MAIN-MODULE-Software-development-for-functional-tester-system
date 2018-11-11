@@ -71,6 +71,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
+#include "stm32f4xx_ll_usb.h"
 
 /** @addtogroup STM32F4xx_HAL_Driver
   * @{
@@ -161,25 +162,25 @@ HAL_StatusTypeDef HAL_HCD_Init(HCD_HandleTypeDef *hhcd)
 
 /**
   * @brief  Initialize a host channel.
-  * @param  hhcd HCD handle
-  * @param  ch_num Channel number.
+  * @param  hhcd: HCD handle
+  * @param  ch_num: Channel number.
   *         This parameter can be a value from 1 to 15
-  * @param  epnum Endpoint number.
+  * @param  epnum: Endpoint number.
   *          This parameter can be a value from 1 to 15
-  * @param  dev_address  Current device address
+  * @param  dev_address : Current device address
   *          This parameter can be a value from 0 to 255
-  * @param  speed Current device speed.
+  * @param  speed: Current device speed.
   *          This parameter can be one of these values:
   *            HCD_SPEED_HIGH: High speed mode,
   *            HCD_SPEED_FULL: Full speed mode,
   *            HCD_SPEED_LOW: Low speed mode
-  * @param  ep_type Endpoint Type.
+  * @param  ep_type: Endpoint Type.
   *          This parameter can be one of these values:
   *            EP_TYPE_CTRL: Control type,
   *            EP_TYPE_ISOC: Isochronous type,
   *            EP_TYPE_BULK: Bulk type,
   *            EP_TYPE_INTR: Interrupt type
-  * @param  mps Max Packet Size.
+  * @param  mps: Max Packet Size.
   *          This parameter can be a value from 0 to32K
   * @retval HAL status
   */
@@ -217,8 +218,8 @@ HAL_StatusTypeDef HAL_HCD_HC_Init(HCD_HandleTypeDef *hhcd,
 
 /**
   * @brief  Halt a host channel.
-  * @param  hhcd HCD handle
-  * @param  ch_num Channel number.
+  * @param  hhcd: HCD handle
+  * @param  ch_num: Channel number.
   *         This parameter can be a value from 1 to 15
   * @retval HAL status
   */
@@ -665,9 +666,17 @@ HAL_StatusTypeDef HAL_HCD_Stop(HCD_HandleTypeDef *hhcd)
   return HAL_OK;
 }
 
+HAL_StatusTypeDef HAL_HCD_StopHC(HCD_HandleTypeDef *hhcd, uint8_t chnum)
+{
+  __HAL_LOCK(hhcd);
+  USB_StopHostChannel(hhcd->Instance, chnum);
+  __HAL_UNLOCK(hhcd);
+  return HAL_OK;
+}
+
 /**
   * @brief  Reset the host port.
-  * @param  hhcd HCD handle
+  * @param  hhcd: HCD handle
   * @retval HAL status
   */
 HAL_StatusTypeDef HAL_HCD_ResetPort(HCD_HandleTypeDef *hhcd)
@@ -827,7 +836,17 @@ static void HCD_HC_IN_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
     hhcd->hc[chnum].state = HC_DATATGLERR;
     __HAL_HCD_CLEAR_HC_INT(chnum, USB_OTG_HCINT_DTERR);
   }    
-  
+
+  // MORI
+  if ((USBx_HC(chnum)->HCINT) &  USB_OTG_HCINT_BBERR)
+  {
+	  __HAL_HCD_UNMASK_HALT_HC_INT(chnum);
+	  __HAL_HCD_CLEAR_HC_INT(chnum, USB_OTG_HCINT_BBERR);
+//LOG1("B");
+//LOG1("<%d>", chnum);
+//	  LOG("BUBBLE>> chnum:%d, addr:%d, size:%d, epnum:%d", chnum, hhcd->hc[chnum].dev_addr, hhcd->hc[chnum].max_packet, hhcd->hc[chnum].ep_num);
+  }
+
   if ((USBx_HC(chnum)->HCINT) &  USB_OTG_HCINT_FRMOR)
   {
     __HAL_HCD_UNMASK_HALT_HC_INT(chnum); 
@@ -918,12 +937,7 @@ static void HCD_HC_IN_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
       __HAL_HCD_UNMASK_HALT_HC_INT(chnum); 
       USB_HC_Halt(hhcd->Instance, chnum);  
     }
-    
-     /* Clear the NAK flag before re-enabling the channel for new IN request */
-    hhcd->hc[chnum].state = HC_NAK;
-    __HAL_HCD_CLEAR_HC_INT(chnum, USB_OTG_HCINT_NAK);
-    
-    if  ((hhcd->hc[chnum].ep_type == EP_TYPE_CTRL)||
+    else if  ((hhcd->hc[chnum].ep_type == EP_TYPE_CTRL)||
               (hhcd->hc[chnum].ep_type == EP_TYPE_BULK))
     {
       /* re-activate the channel */
@@ -932,19 +946,22 @@ static void HCD_HC_IN_IRQHandler(HCD_HandleTypeDef *hhcd, uint8_t chnum)
       tmpreg |= USB_OTG_HCCHAR_CHENA;
       USBx_HC(chnum)->HCCHAR = tmpreg;
     }
+    hhcd->hc[chnum].state = HC_NAK;
+    __HAL_HCD_CLEAR_HC_INT(chnum, USB_OTG_HCINT_NAK);
   }
 }
 
 /**
   * @brief  Handle Host Channel OUT interrupt requests.
-  * @param  hhcd HCD handle
-  * @param  chnum Channel number.
+  * @param  hhcd: HCD handle
+  * @param  chnum: Channel number.
   *         This parameter can be a value from 1 to 15
   * @retval None
   */
 static void HCD_HC_OUT_IRQHandler  (HCD_HandleTypeDef *hhcd, uint8_t chnum)
 {
   USB_OTG_GlobalTypeDef *USBx = hhcd->Instance;
+  uint32_t tmpreg = 0;
   
   if ((USBx_HC(chnum)->HCINT) &  USB_OTG_HCINT_AHBERR)
   {
@@ -1057,15 +1074,21 @@ static void HCD_HC_OUT_IRQHandler  (HCD_HandleTypeDef *hhcd, uint8_t chnum)
     else if((hhcd->hc[chnum].state == HC_XACTERR) ||
             (hhcd->hc[chnum].state == HC_DATATGLERR))
     {
-      if(hhcd->hc[chnum].ErrCnt++ > 3U)
+      if(hhcd->hc[chnum].ErrCnt++ > 3)
       {      
-        hhcd->hc[chnum].ErrCnt = 0U;
+        hhcd->hc[chnum].ErrCnt = 0;
         hhcd->hc[chnum].urb_state = URB_ERROR;
       }
       else
       {
         hhcd->hc[chnum].urb_state = URB_NOTREADY;
       }
+      
+      /* re-activate the channel  */
+      tmpreg = USBx_HC(chnum)->HCCHAR;
+      tmpreg &= ~USB_OTG_HCCHAR_CHDIS;
+      tmpreg |= USB_OTG_HCCHAR_CHENA;
+      USBx_HC(chnum)->HCCHAR = tmpreg;
     }
     
     __HAL_HCD_CLEAR_HC_INT(chnum, USB_OTG_HCINT_CHH);
@@ -1075,7 +1098,7 @@ static void HCD_HC_OUT_IRQHandler  (HCD_HandleTypeDef *hhcd, uint8_t chnum)
 
 /**
   * @brief  Handle Rx Queue Level interrupt requests.
-  * @param  hhcd HCD handle
+  * @param  hhcd: HCD handle
   * @retval None
   */
 static void HCD_RXQLVL_IRQHandler(HCD_HandleTypeDef *hhcd)
@@ -1086,6 +1109,11 @@ static void HCD_RXQLVL_IRQHandler(HCD_HandleTypeDef *hhcd)
   uint32_t pktcnt; 
   uint32_t temp = 0U;
   uint32_t tmpreg = 0U;
+// MORI - nao existia
+//LOG(">> %d", (hhcd->Instance->GINTMSK & USB_OTG_GINTMSK_RXFLVLM) >> 4);
+  // Disable the Rx Status Queue Level interrupt
+//  hhcd->Instance->GINTMSK |= USB_OTG_GINTMSK_RXFLVLM;
+//LOG(">> %d", (hhcd->Instance->GINTMSK & USB_OTG_GINTMSK_RXFLVLM) >> 4);
   
   temp = hhcd->Instance->GRXSTSP;
   channelnum = temp &  USB_OTG_GRXSTSP_EPNUM;  
@@ -1124,11 +1152,15 @@ static void HCD_RXQLVL_IRQHandler(HCD_HandleTypeDef *hhcd)
   default:
     break;
   }
+// MORI - nao existia
+  // Enable the Rx Status Queue Level interrupt
+//  hhcd->Instance->GINTMSK &= ~USB_OTG_GINTMSK_RXFLVLM;
+//  LOG(">>> %d", (hhcd->Instance->GINTMSK & USB_OTG_GINTMSK_RXFLVLM) >> 4);
 }
 
 /**
   * @brief  Handle Host Port interrupt requests.
-  * @param  hhcd HCD handle
+  * @param  hhcd: HCD handle
   * @retval None
   */
 static void HCD_Port_IRQHandler  (HCD_HandleTypeDef *hhcd)
@@ -1177,11 +1209,15 @@ static void HCD_Port_IRQHandler  (HCD_HandleTypeDef *hhcd)
       {
         if(hhcd->Init.speed == HCD_SPEED_FULL)
         {
-          USBx_HOST->HFIR = 60000U;
+          USBx_HOST->HFIR = (uint32_t)60000;
         }
       }
-      
       HAL_HCD_Connect_Callback(hhcd);
+      
+      if(hhcd->Init.speed == HCD_SPEED_HIGH)
+      {
+        USB_UNMASK_INTERRUPT(hhcd->Instance, USB_OTG_GINTSTS_DISCINT); 
+      }
     }
     else
     {
