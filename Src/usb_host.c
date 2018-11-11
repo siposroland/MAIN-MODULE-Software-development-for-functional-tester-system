@@ -78,10 +78,6 @@ ApplicationTypeDef Appli_state = APPLICATION_IDLE;
 
 /* USER CODE END 0 */
 
-/*
- * user callback declaration
- */
-static void USBH_UserProcess(USBH_HandleTypeDef *phost, uint8_t id);
 
 /*
  * -- Insert your external function declaration here --
@@ -120,34 +116,7 @@ void MX_USB_HOST_Process(void)
   /* USB Host Background task */
   USBH_Process(&hUsbHostFS);
 }
-/*
- * user callback definition
- */
-static void USBH_UserProcess  (USBH_HandleTypeDef *phost, uint8_t id)
-{
-  /* USER CODE BEGIN CALL_BACK_1 */
-  switch(id)
-  {
-  case HOST_USER_SELECT_CONFIGURATION:
-  break;
 
-  case HOST_USER_DISCONNECTION:
-  Appli_state = APPLICATION_DISCONNECT;
-  break;
-
-  case HOST_USER_CLASS_ACTIVE:
-  Appli_state = APPLICATION_READY;
-  break;
-
-  case HOST_USER_CONNECTION:
-  Appli_state = APPLICATION_START;
-  break;
-
-  default:
-  break;
-  }
-  /* USER CODE END CALL_BACK_1 */
-}
 
 /**
   * @}
