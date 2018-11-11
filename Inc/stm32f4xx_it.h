@@ -1,10 +1,14 @@
 /**
   ******************************************************************************
-  * @file    stm32f4xx_it.h
+  * @file    Templates/Inc/stm32f4xx_it.h 
+  * @author  MCD Application Team
+  * @version V1.2.2
+  * @date    09-October-2015
   * @brief   This file contains the headers of the interrupt handlers.
   ******************************************************************************
+  * @attention
   *
-  * COPYRIGHT(c) 2018 STMicroelectronics
+  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -40,8 +44,6 @@
 #endif 
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f4xx_hal.h"
-#include "main.h"
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
@@ -56,7 +58,6 @@ void SVC_Handler(void);
 void DebugMon_Handler(void);
 void PendSV_Handler(void);
 void SysTick_Handler(void);
-void OTG_FS_IRQHandler(void);
 
 #ifdef __cplusplus
 }

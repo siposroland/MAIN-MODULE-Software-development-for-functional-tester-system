@@ -101,11 +101,11 @@ void MX_USB_HOST_Init(void)
   /* USER CODE END USB_HOST_Init_PreTreatment */
   
   /* Init host Library, add supported class and start the library. */
-  USBH_Init(&hUsbHostFS, USBH_UserProcess, HOST_FS);
+  /*USBH_Init(&hUsbHostFS, USBH_UserProcess, HOST_FS);
 
   USBH_RegisterClass(&hUsbHostFS, USBH_HID_CLASS);
 
-  USBH_Start(&hUsbHostFS);
+  USBH_Start(&hUsbHostFS);*/
 
   /* USER CODE BEGIN USB_HOST_Init_PostTreatment */
   
