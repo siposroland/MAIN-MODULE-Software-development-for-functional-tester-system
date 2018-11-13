@@ -61,6 +61,8 @@
 #include "usbh_hid.h"
 #include "usbh_hub.h"
 
+#include "usbh_hid_digital_io.h"
+
 #include "log.h"
 /* USER CODE END Includes */
 
@@ -262,11 +264,11 @@ LOG("PROCESSING ATTACH %d", _phost->address);
 
 	if(_phost != NULL && _phost->valid)
 	{
-		HID_MOUSE_Info_TypeDef *minfo;
-		minfo = USBH_HID_GetMouseInfo(_phost);
-		if(minfo != NULL)
+		HID_DIGITAL_IO_Info_TypeDef *dio;
+		dio = USBH_HID_Get_Digital_IO_Info(_phost);
+		if(dio != NULL)
 		{
-LOG("BUTTON %d", minfo->buttons[0]);
+LOG("PORT1PIN1: %d", dio->ports[0].direction);
 		}
 		else
 		{
