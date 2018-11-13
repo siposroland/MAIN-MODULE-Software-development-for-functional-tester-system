@@ -236,6 +236,7 @@ if(hUSBHost[1].busy)
     	    if(USBH_LL_GetURBState(phost, HUB_Handle->InPipe) == USBH_URB_DONE)
     	    {
 //LOG1("^");
+    	    	USBH_UsrLog("Done +++++++++++++++");
     	    	if(HUB_Handle->DataReady == 0)
     	    	{
     	    		HUB_Handle->DataReady = 1;
@@ -257,6 +258,7 @@ if(hUSBHost[1].busy)
     		else if(USBH_LL_GetURBState(phost , HUB_Handle->InPipe) == USBH_URB_ERROR)
     		{
 //LOG1("=");
+    			USBH_UsrLog("Error ---------------------");
     		}
     		break;
 
