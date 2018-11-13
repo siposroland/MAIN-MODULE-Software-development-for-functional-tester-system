@@ -13,6 +13,7 @@
 #include "stm32f4xx.h"
 #include "stm32f4xx_it.h"
 #include "usbh_conf.h"
+extern PCD_HandleTypeDef hpcd_USB_OTG_HS;
 
 extern HCD_HandleTypeDef _hHCD[2];
 
