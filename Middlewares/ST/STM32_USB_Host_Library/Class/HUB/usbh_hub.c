@@ -217,8 +217,9 @@ static USBH_StatusTypeDef USBH_HUB_Process(USBH_HandleTypeDef *phost)
 
      	case HUB_SYNC:
      	    /* Sync with start of Even Frame */
-     	    if(phost->Timer & 1)
+     	    if(phost->Timer & 1){
      	    	HUB_Handle->state = HUB_GET_DATA;
+     	    }
      		break;
 
     	case HUB_GET_DATA:

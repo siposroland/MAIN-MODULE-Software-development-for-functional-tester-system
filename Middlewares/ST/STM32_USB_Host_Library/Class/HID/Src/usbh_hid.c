@@ -54,6 +54,7 @@ static void  USBH_HID_ParseHIDDesc (HID_DescTypeDef *desc, uint8_t *buf);
 
 extern USBH_StatusTypeDef USBH_HID_MouseInit(USBH_HandleTypeDef *phost);
 extern USBH_StatusTypeDef USBH_HID_KeybdInit(USBH_HandleTypeDef *phost);
+extern USBH_StatusTypeDef USBH_HID_Digital_IO_Init(USBH_HandleTypeDef *phost);
 
 USBH_ClassTypeDef  HID_Class =
 {
@@ -217,9 +218,15 @@ USBH_UsrLog ("KeyBoard found.");
 				}
 				else if(pif->bInterfaceClass == 0x03 && pif->bInterfaceSubClass == 0x01 && pif->bInterfaceProtocol == HID_MOUSE_BOOT_CODE)
 				{
-USBH_UsrLog ("Mouse found.");
+USBH_UsrLog ("Mouses found.");
 					HID_Handle = create_handle(phost);
 					HID_Handle->Init =  USBH_HID_MouseInit;
+				}
+				else if(pif->bInterfaceClass == 0x03 && pif->bInterfaceSubClass == 0x01 && pif->bInterfaceProtocol == HID_DIGITAL_IO_BOOT_CODE)
+				{
+USBH_UsrLog ("Digital IO module found.");
+					HID_Handle = create_handle(phost);
+					HID_Handle->Init =  USBH_HID_Digital_IO_Init;
 				}
 
 				if(if_ix > 0 && HID_Handle == NULL)
@@ -683,6 +690,11 @@ HID_TypeTypeDef USBH_HID_GetDeviceType(USBH_HandleTypeDef *phost)
     else if(phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].bInterfaceProtocol == HID_MOUSE_BOOT_CODE)
     {
       type=  HID_MOUSE;  
+    }
+    else if(phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].bInterfaceProtocol == HID_DIGITAL_IO_BOOT_CODE)
+    {
+      type=  HID_DIGITAL_IO;
+      return 0x03;
     }
   }
   return type;
