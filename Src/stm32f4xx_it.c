@@ -27,6 +27,9 @@ void SysTick_Handler(void)
 {
 	HAL_IncTick();
 	HAL_SYSTICK_IRQHandler();
+}
+#endif
+
 /******************************************************************************/
 /* STM32F4xx Peripheral Interrupt Handlers                                    */
 /* Add here the Interrupt Handlers for the used peripherals.                  */
@@ -45,8 +48,9 @@ void EXTI15_10_IRQHandler(void)
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_13);
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
 
+  /* USER CODE END EXTI15_10_IRQn 1 */
 }
-#endif
+
 
 void OTG_FS_IRQHandler(void)
 {

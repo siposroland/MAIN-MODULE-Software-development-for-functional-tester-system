@@ -88,7 +88,6 @@ static void USBH_UserProcess (USBH_HandleTypeDef *pHost, uint8_t vId);
 static void hub_process();
 /* USER CODE BEGIN 0 */
 uint8_t enabled = 0;
-uint8_t dis = 1;
 /* USER CODE END 0 */
 
 /**
@@ -281,15 +280,11 @@ void hub_process()
 					LOG("TICK+: %d", HAL_GetTick());
 					HAL_Delay(1);
 					LOG("++++++++");
-					enabled = 1;
 				}
 				else
 				{
 					LOG("TICK-: %d", HAL_GetTick());
 					HAL_Delay(1);
-					LOG("--------");
-					enabled = 0;
-					dis = 0;
 				}
 			}
 		}
@@ -343,6 +338,20 @@ void USBH_UserProcess (USBH_HandleTypeDef *pHost, uint8_t vId)
 		default:
 			break;
 	}
+}
+
+/**
+  * @brief  EXTI line detection callbacks.
+  * @param  GPIO_Pin Specifies the pins connected EXTI line
+  * @retval None
+  */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  /* Prevent unused argument(s) compilation warning */
+  enabled = 1;
+  /* NOTE: This function Should not be modified, when the callback is needed,
+           the HAL_GPIO_EXTI_Callback could be implemented in the user file
+   */
 }
 
 /* USER CODE END 4 */
