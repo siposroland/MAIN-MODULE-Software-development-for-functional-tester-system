@@ -32,7 +32,12 @@ uint8_t LOG_INIT(USART_TypeDef *usart, uint32_t baudrate)
 
 void write_string(const char *data)
 {
-	HAL_UART_Transmit(&hUartHandle, (uint8_t *)data, strlen(data), LOGGER_TIMEOUT);
+	uint8_t temp[200] = {0};
+	strcpy(&temp, data);
+	temp[strlen(data)] = '\r';
+	temp[strlen(data)+1] = '\n';
+	CDC_Transmit_HS((uint8_t *)temp, strlen(temp));
+	//HAL_UART_Transmit(&hUartHandle, (uint8_t *)data, strlen(data), LOGGER_TIMEOUT);
 }
 
 void LOG(const char *__msg, ...)
@@ -44,7 +49,7 @@ void LOG(const char *__msg, ...)
     va_end (ap);
 
     write_string(buffer);
-    write_string("\r\n");
+    //write_string("\n");
 }
 
 void LOG1(const char *__msg, ...)
