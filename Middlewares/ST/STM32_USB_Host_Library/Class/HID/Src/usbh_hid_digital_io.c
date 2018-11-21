@@ -35,36 +35,146 @@ static USBH_StatusTypeDef USBH_HID_Digital_IO_Decode(USBH_HandleTypeDef *phost);
 
 /* Structures defining how to access items in a HID digital io report */
 /* Port number (max 8). */
-static const HID_Report_ItemTypedef portnum={
-  (uint8_t *)digital_io_report_data+0, /*data*/
-  8,     	/*size*/
+static const HID_Report_ItemTypedef pin0={
+  (uint8_t *)digital_io_report_data+1, /*data*/
+  4,     	/*size*/
   0,     	/*shift*/
   0,     	/*count (only for array items)*/
   0,     	/*signed?*/
   0,     	/*min value read can return*/
-  0xFFFF,   /*max value read can return*/
+  0xFF,   /*max value read can return*/
   0,     	/*min value device can report*/
-  0xFFFF,   /*max value device can report*/
+  0xFF,   /*max value device can report*/
+  1      	/*resolution*/
+};
+
+/* Structures defining how to access items in a HID digital io report */
+/* Port number (max 8). */
+static const HID_Report_ItemTypedef pin1={
+  (uint8_t *)digital_io_report_data+1, /*data*/
+  4,     	/*size*/
+  4,     	/*shift*/
+  0,     	/*count (only for array items)*/
+  0,     	/*signed?*/
+  0,     	/*min value read can return*/
+  0xFF,   /*max value read can return*/
+  0,     	/*min value device can report*/
+  0xFF,   /*max value device can report*/
   1      	/*resolution*/
 };
 
 /* Pin values (max 16 pin). */
-static const HID_Report_ItemTypedef pinval={
-  (uint8_t *)digital_io_report_data+1, /*data*/
+static const HID_Report_ItemTypedef pin2={
+  (uint8_t *)digital_io_report_data+2, /*data*/
+  4,     	/*size*/
+  0,     	/*shift*/
+  0,     	/*count (only for array items)*/
+  0,     	/*signed?*/
+  0,     	/*min value read can return*/
+  0xFF,   /*max value read can return*/
+  0,     	/*min value device can report*/
+  0xFF,   /*max value device can report*/
+  1      	/*resolution*/
+};
+
+/* Pin values (max 16 pin). */
+static const HID_Report_ItemTypedef pin3={
+  (uint8_t *)digital_io_report_data+2, /*data*/
+  4,     	/*size*/
+  4,     	/*shift*/
+  0,     	/*count (only for array items)*/
+  0,     	/*signed?*/
+  0,     	/*min value read can return*/
+  0xFF,   /*max value read can return*/
+  0,     	/*min value device can report*/
+  0xFF,   /*max value device can report*/
+  1      	/*resolution*/
+};
+
+/* Pin values (max 16 pin). */
+static const HID_Report_ItemTypedef pin4={
+  (uint8_t *)digital_io_report_data+3, /*data*/
+  4,     	/*size*/
+  0,     	/*shift*/
+  0,     	/*count (only for array items)*/
+  0,     	/*signed?*/
+  0,     	/*min value read can return*/
+  0xFF,   /*max value read can return*/
+  0,     	/*min value device can report*/
+  0xFF,   /*max value device can report*/
+  1      	/*resolution*/
+};
+
+/* Pin values (max 16 pin). */
+static const HID_Report_ItemTypedef pin5={
+  (uint8_t *)digital_io_report_data+3, /*data*/
+  4,     	/*size*/
+  4,     	/*shift*/
+  0,     	/*count (only for array items)*/
+  0,     	/*signed?*/
+  0,     	/*min value read can return*/
+  0xFF,   /*max value read can return*/
+  0,     	/*min value device can report*/
+  0xFF,   /*max value device can report*/
+  1      	/*resolution*/
+};
+
+/* Pin values (max 16 pin). */
+static const HID_Report_ItemTypedef data7={
+  (uint8_t *)digital_io_report_data+7, /*data*/
   8,     	/*size*/
   0,     	/*shift*/
   0,     	/*count (only for array items)*/
   0,     	/*signed?*/
   0,     	/*min value read can return*/
-  0xFFFF,   /*max value read can return*/
+  0xFF,   /*max value read can return*/
   0,     	/*min value device can report*/
-  0xFFFF,   /*max value device can report*/
+  0xFF,   /*max value device can report*/
+  1      	/*resolution*/
+};
+
+static const HID_Report_ItemTypedef data8={
+  (uint8_t *)digital_io_report_data+8, /*data*/
+  8,     	/*size*/
+  0,     	/*shift*/
+  0,     	/*count (only for array items)*/
+  0,     	/*signed?*/
+  0,     	/*min value read can return*/
+  0xFF,   /*max value read can return*/
+  0,     	/*min value device can report*/
+  0xFF,   /*max value device can report*/
+  1      	/*resolution*/
+};
+
+static const HID_Report_ItemTypedef data9={
+  (uint8_t *)digital_io_report_data+9, /*data*/
+  8,     	/*size*/
+  0,     	/*shift*/
+  0,     	/*count (only for array items)*/
+  0,     	/*signed?*/
+  0,     	/*min value read can return*/
+  0xFF,   /*max value read can return*/
+  0,     	/*min value device can report*/
+  0xFF,   /*max value device can report*/
+  1      	/*resolution*/
+};
+
+static const HID_Report_ItemTypedef data10={
+  (uint8_t *)digital_io_report_data+10, /*data*/
+  8,     	/*size*/
+  0,     	/*shift*/
+  0,     	/*count (only for array items)*/
+  0,     	/*signed?*/
+  0,     	/*min value read can return*/
+  0xFF,   /*max value read can return*/
+  0,     	/*min value device can report*/
+  0xFF,   /*max value device can report*/
   1      	/*resolution*/
 };
 
 /* Pin direction. */
-static const HID_Report_ItemTypedef direction={
-  (uint8_t *)digital_io_report_data+2, /*data*/
+static const HID_Report_ItemTypedef btn1={
+  (uint8_t *)digital_io_report_data+0, /*data*/
   1,     /*size*/
   0,     /*shift*/
   0,     /*count (only for array items)*/
@@ -75,6 +185,107 @@ static const HID_Report_ItemTypedef direction={
   1,     /*max value device can report*/
   1      /*resolution*/
 };
+
+/* Pin direction. */
+static const HID_Report_ItemTypedef btn2={
+  (uint8_t *)digital_io_report_data+0, /*data*/
+  1,     /*size*/
+  1,     /*shift*/
+  0,     /*count (only for array items)*/
+  0,     /*signed?*/
+  0,     /*min value read can return*/
+  1,     /*max value read can return*/
+  0,     /*min value device can report*/
+  1,     /*max value device can report*/
+  1      /*resolution*/
+};
+
+/* Pin direction. */
+static const HID_Report_ItemTypedef btn3={
+  (uint8_t *)digital_io_report_data+0, /*data*/
+  1,     /*size*/
+  2,     /*shift*/
+  0,     /*count (only for array items)*/
+  0,     /*signed?*/
+  0,     /*min value read can return*/
+  1,     /*max value read can return*/
+  0,     /*min value device can report*/
+  1,     /*max value device can report*/
+  1      /*resolution*/
+};
+
+/* Pin direction. */
+static const HID_Report_ItemTypedef btn4={
+  (uint8_t *)digital_io_report_data+0, /*data*/
+  1,     /*size*/
+  3,     /*shift*/
+  0,     /*count (only for array items)*/
+  0,     /*signed?*/
+  0,     /*min value read can return*/
+  1,     /*max value read can return*/
+  0,     /*min value device can report*/
+  1,     /*max value device can report*/
+  1      /*resolution*/
+};
+
+/* Pin direction. */
+static const HID_Report_ItemTypedef btn5={
+  (uint8_t *)digital_io_report_data+0, /*data*/
+  1,     /*size*/
+  4,     /*shift*/
+  0,     /*count (only for array items)*/
+  0,     /*signed?*/
+  0,     /*min value read can return*/
+  1,     /*max value read can return*/
+  0,     /*min value device can report*/
+  1,     /*max value device can report*/
+  1      /*resolution*/
+};
+
+/* Pin direction. */
+static const HID_Report_ItemTypedef btn6={
+  (uint8_t *)digital_io_report_data+0, /*data*/
+  1,     /*size*/
+  5,     /*shift*/
+  0,     /*count (only for array items)*/
+  0,     /*signed?*/
+  0,     /*min value read can return*/
+  1,     /*max value read can return*/
+  0,     /*min value device can report*/
+  1,     /*max value device can report*/
+  1      /*resolution*/
+};
+
+/* Pin direction. */
+static const HID_Report_ItemTypedef btn7={
+  (uint8_t *)digital_io_report_data+0, /*data*/
+  1,     /*size*/
+  6,     /*shift*/
+  0,     /*count (only for array items)*/
+  0,     /*signed?*/
+  0,     /*min value read can return*/
+  1,     /*max value read can return*/
+  0,     /*min value device can report*/
+  1,     /*max value device can report*/
+  1      /*resolution*/
+};
+
+/* Pin direction. */
+static const HID_Report_ItemTypedef btn8={
+  (uint8_t *)digital_io_report_data+0, /*data*/
+  1,     /*size*/
+  7,     /*shift*/
+  0,     /*count (only for array items)*/
+  0,     /*signed?*/
+  0,     /*min value read can return*/
+  1,     /*max value read can return*/
+  0,     /*min value device can report*/
+  1,     /*max value device can report*/
+  1      /*resolution*/
+};
+
+static const HID_Report_ItemTypedef* btn[8] = {&btn1, &btn2, &btn3, &btn4, &btn5, &btn6, &btn7, &btn8};
+static const HID_Report_ItemTypedef* pin[6] = {&pin0, &pin1, &pin2, &pin3, &pin4, &pin5};
 
 
 
@@ -91,11 +302,11 @@ USBH_StatusTypeDef USBH_HID_Digital_IO_Init(USBH_HandleTypeDef *phost)
   HID_HandleTypeDef *HID_Handle = phost->USBH_ClassTypeDef_pData[idx];
 
   // Initialize default values
-  digital_io_info.port_enabled_size = 0;
+  digital_io_info.port_enabled_size = 6;
   digital_io_info.is_inited = 1;
   for(i = 0; i < DIGITAL_MAX_PORT_NUM; i++)
   {
-	  digital_io_info.ports[i].pin_enabled_size = 0;
+	  digital_io_info.ports[i].pin_enabled_size = 4;
 	  digital_io_info.ports[i].direction = DIGITAL_PIN_INPUT;
 	  for (j = 0; j < DIGITAL_MAX_PIN_NUM; j++){
 		  digital_io_info.ports[i].pins[j] = DIGITAL_PIN_LOW;
@@ -153,26 +364,29 @@ static USBH_StatusTypeDef USBH_HID_Digital_IO_Decode(USBH_HandleTypeDef *phost)
   //Fill report
   if((fifo_read(&HID_Handle->fifo, &digital_io_report_data, HID_Handle->length[0]) ==  HID_Handle->length[0]) /*&& (digital_io_info.is_inited)*/)
   {
-	uint8_t actual_port = 0;
-	uint8_t i = 0;
+	uint8_t port_idx = 0, pin_idx = 0;
     // Decode report
 
 	// Read actual port number
-	actual_port = (int16_t )HID_ReadItem((HID_Report_ItemTypedef *) &portnum, 0);
+
 
 	// Check size and continue decode
-	//if(digital_io_info.port_enabled_size > actual_port)
-	//{
 		// Read IO direction
-		digital_io_info.ports[actual_port].direction = (uint8_t)HID_ReadItem((HID_Report_ItemTypedef *) &direction, 0);
 
+	for(port_idx = 0; port_idx < digital_io_info.port_enabled_size; port_idx++ )
+	{
+		digital_io_info.ports[port_idx].direction = (uint8_t)HID_ReadItem((HID_Report_ItemTypedef *) btn[port_idx], 0);
+		volatile uint8_t temp = (uint8_t)HID_ReadItem((HID_Report_ItemTypedef *) pin[port_idx], 0);
 		// Read pins
-		for (i = 0; i < digital_io_info.ports[actual_port].pin_enabled_size; i++)
+		for (pin_idx = 0; pin_idx < digital_io_info.ports[port_idx].pin_enabled_size; pin_idx++)
 		{
-			uint16_t temp = (int16_t )HID_ReadItem((HID_Report_ItemTypedef *) &pinval, 0);
-			digital_io_info.ports[actual_port].pins[i] = 1 & (temp << i);
+
+			volatile uint8_t temp2 = (temp >> pin_idx);
+			volatile uint8_t temp3 = 1 & temp2;
+			digital_io_info.ports[port_idx].pins[pin_idx] = temp3;
 		}
-	//}
+	}
+
 	//else
 	//{
 		//return   USBH_FAIL;
