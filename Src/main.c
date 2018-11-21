@@ -88,6 +88,7 @@ static void USBH_UserProcess (USBH_HandleTypeDef *pHost, uint8_t vId);
 static void hub_process();
 /* USER CODE BEGIN 0 */
 uint8_t enabled = 0;
+uint8_t trigger = 0;
 /* USER CODE END 0 */
 
 /**
@@ -96,8 +97,6 @@ uint8_t enabled = 0;
   * @retval None
   */
 int main(void)
-
-
 {
   /* USER CODE BEGIN 1 */
 
@@ -250,7 +249,7 @@ void hub_process()
 			{
 				static uint8_t cnt = 0;
 				//HAL_Delay(10);
-				uint8_t test[7] = {6,0b1111111111,0,0,0,0,0};
+				uint8_t test[7] = {6,0b11111111,0,0,0,0,0};
 
 				status = USBH_HID_SetReport(&hUSBHost[0],cnt,0,test,7);
 
@@ -259,6 +258,21 @@ void hub_process()
 			}
 			while(status != USBH_OK);
 			enabled = 0;
+		}
+		if(trigger /*&& dis*/){
+			do
+			{
+				static uint8_t cnt = 0;
+				//HAL_Delay(10);
+				uint8_t test[2] = {1, 0xfe};
+
+				status = USBH_HID_SetReport(&hUSBHost[0],cnt,0,test,2);
+
+				//LOG("CNT: %d", cnt);
+
+			}
+			while(status != USBH_OK);
+			trigger = 0;
 		}
 		if(_phost != NULL && _phost->valid)
 		{
@@ -348,7 +362,15 @@ void USBH_UserProcess (USBH_HandleTypeDef *pHost, uint8_t vId)
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
   /* Prevent unused argument(s) compilation warning */
-  enabled = 1;
+	if(GPIO_Pin == GPIO_PIN_13)
+	{
+		enabled = 1;
+	}
+	else
+	{
+		trigger = 1;
+	}
+
   /* NOTE: This function Should not be modified, when the callback is needed,
            the HAL_GPIO_EXTI_Callback could be implemented in the user file
    */
