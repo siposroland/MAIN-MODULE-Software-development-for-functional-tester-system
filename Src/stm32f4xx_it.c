@@ -13,6 +13,7 @@
 #include "stm32f4xx.h"
 #include "stm32f4xx_it.h"
 #include "usbh_conf.h"
+extern PCD_HandleTypeDef hpcd_USB_OTG_HS;
 
 extern HCD_HandleTypeDef _hHCD[2];
 
@@ -39,9 +40,16 @@ void OTG_FS_IRQHandler(void)
 
 void OTG_HS_IRQHandler(void)
 {
-	HAL_NVIC_ClearPendingIRQ(OTG_HS_IRQn);
+  /* USER CODE BEGIN OTG_HS_IRQn 0 */
 
-	if(_hHCD[ID_USB_HOST_HS].Instance == USB_OTG_HS)
-		HAL_HCD_IRQHandler(&_hHCD[ID_USB_HOST_HS]);
+  /* USER CODE END OTG_HS_IRQn 0 */
+  HAL_PCD_IRQHandler(&hpcd_USB_OTG_HS);
+  /* USER CODE BEGIN OTG_HS_IRQn 1 */
+
+  /* USER CODE END OTG_HS_IRQn 1 */
 }
 
+/* USER CODE BEGIN 1 */
+
+/* USER CODE END 1 */
+/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

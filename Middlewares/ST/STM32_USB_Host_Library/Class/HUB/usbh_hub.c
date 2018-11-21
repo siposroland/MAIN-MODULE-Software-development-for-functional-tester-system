@@ -217,8 +217,9 @@ static USBH_StatusTypeDef USBH_HUB_Process(USBH_HandleTypeDef *phost)
 
      	case HUB_SYNC:
      	    /* Sync with start of Even Frame */
-     	    if(phost->Timer & 1)
+     	    if(phost->Timer & 1){
      	    	HUB_Handle->state = HUB_GET_DATA;
+     	    }
      		break;
 
     	case HUB_GET_DATA:
@@ -235,6 +236,7 @@ if(hUSBHost[1].busy)
     	    if(USBH_LL_GetURBState(phost, HUB_Handle->InPipe) == USBH_URB_DONE)
     	    {
 //LOG1("^");
+    	    	USBH_UsrLog("Done +++++++++++++++");
     	    	if(HUB_Handle->DataReady == 0)
     	    	{
     	    		HUB_Handle->DataReady = 1;
@@ -256,6 +258,7 @@ if(hUSBHost[1].busy)
     		else if(USBH_LL_GetURBState(phost , HUB_Handle->InPipe) == USBH_URB_ERROR)
     		{
 //LOG1("=");
+    			USBH_UsrLog("Error ---------------------");
     		}
     		break;
 

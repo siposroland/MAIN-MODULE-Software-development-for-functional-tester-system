@@ -143,6 +143,7 @@ typedef enum
 {
   HID_MOUSE    = 0x01,
   HID_KEYBOARD = 0x02,
+  HID_DIGITAL_IO = 0x03,
   HID_UNKNOWN = 0xFF,
 }
 HID_TypeTypeDef;
@@ -267,6 +268,7 @@ typedef struct _HID_Process
 #define HID_BOOT_CODE                                  0x01    
 #define HID_KEYBRD_BOOT_CODE                           0x01
 #define HID_MOUSE_BOOT_CODE                            0x02
+#define HID_DIGITAL_IO_BOOT_CODE                       0x03
 
 
 /**
