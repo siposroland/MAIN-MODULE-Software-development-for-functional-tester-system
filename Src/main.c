@@ -88,6 +88,7 @@ static void USBH_UserProcess (USBH_HandleTypeDef *pHost, uint8_t vId);
 static void hub_process();
 /* USER CODE BEGIN 0 */
 uint8_t enabled = 0;
+uint8_t dis = 1;
 /* USER CODE END 0 */
 
 /**
@@ -245,14 +246,14 @@ void hub_process()
 	{
 		current_loop++;
 		volatile USBH_StatusTypeDef status;
-		if(enabled){
+		if(enabled /*&& dis*/){
 			do
 			{
 				static uint8_t cnt = 0;
 				//HAL_Delay(10);
-				uint8_t test[10] = {9,6,8,5,6,3,6,3,1,7};
+				uint8_t test[7] = {6,0b1111111111,0,0,0,0,0};
 
-				status = USBH_HID_SetReport(&hUSBHost[0],cnt,0,test,10);
+				status = USBH_HID_SetReport(&hUSBHost[0],cnt,0,test,7);
 
 				//LOG("CNT: %d", cnt);
 
@@ -267,7 +268,14 @@ void hub_process()
 			if(dio != NULL)
 			{
 				HAL_Delay(1);
-				//LOG("PORT0PIN0: %d \r\n", dio->ports[0].pins[0]);
+				LOG("PORT0PIN0: %d \r\n", dio->ports[0].pins[0]);
+				HAL_Delay(1);
+				LOG("PORT0PIN1: %d \r\n", dio->ports[0].pins[1]);
+				HAL_Delay(1);
+				LOG("PORT0PIN2: %d \r\n", dio->ports[0].pins[2]);
+				HAL_Delay(1);
+				LOG("PORT0PIN3: %d \r\n", dio->ports[0].pins[3]);
+				HAL_Delay(1);
 				if (dio->ports[0].pins[0] == 0)
 				{
 					LOG("TICK+: %d", HAL_GetTick());
@@ -281,12 +289,8 @@ void hub_process()
 					HAL_Delay(1);
 					LOG("--------");
 					enabled = 0;
+					dis = 0;
 				}
-
-				//USBH_CtlSendSetup(&hUSBHost[0], test, &hUSBHost[0].Control.pipe_out);
-
-
-				//MX_USB_HOST_Process();
 			}
 		}
 
