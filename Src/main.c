@@ -87,7 +87,7 @@ USBH_HandleTypeDef hUSBHost[5];
 static void USBH_UserProcess (USBH_HandleTypeDef *pHost, uint8_t vId);
 static void hub_process();
 /* USER CODE BEGIN 0 */
-
+uint8_t enabled = 0;
 /* USER CODE END 0 */
 
 /**
@@ -244,18 +244,64 @@ void hub_process()
 	while(1)
 	{
 		current_loop++;
+		volatile USBH_StatusTypeDef status;
+		if(enabled){
+			do
+			{
+				static uint8_t cnt = 0;
+				//HAL_Delay(10);
+				uint8_t test[10] = {9,6,8,5,6,3,6,3,1,7};
+
+				status = USBH_HID_SetReport(&hUSBHost[0],cnt,0,test,10);
+
+				//LOG("CNT: %d", cnt);
+
+			}
+			while(status != USBH_OK);
+			enabled = 0;
+		}
+		if(_phost != NULL && _phost->valid)
+		{
+			HID_DIGITAL_IO_Info_TypeDef *dio;
+			dio = USBH_HID_Get_Digital_IO_Info(_phost);
+			if(dio != NULL)
+			{
+				HAL_Delay(1);
+				//LOG("PORT0PIN0: %d \r\n", dio->ports[0].pins[0]);
+				if (dio->ports[0].pins[0] == 0)
+				{
+					LOG("TICK+: %d", HAL_GetTick());
+					HAL_Delay(1);
+					LOG("++++++++");
+					enabled = 1;
+				}
+				else
+				{
+					LOG("TICK-: %d", HAL_GetTick());
+					HAL_Delay(1);
+					LOG("--------");
+					enabled = 0;
+				}
+
+				//USBH_CtlSendSetup(&hUSBHost[0], test, &hUSBHost[0].Control.pipe_out);
+
+
+				//MX_USB_HOST_Process();
+			}
+		}
 
 		if(current_loop > MAX_HUB_PORTS)
 			current_loop = 0;
 
 		if(hUSBHost[current_loop].valid)
 		{
+
 			_phost = &hUSBHost[current_loop];
 			USBH_LL_SetupEP0(_phost);
 
 			if(_phost->valid == 3)
 			{
-LOG("PROCESSING ATTACH %d", _phost->address);
+LOG("PROCESSING ATTACH %d \r\n", _phost->address);
 				_phost->valid = 1;
 				_phost->busy  = 1;
 			}
@@ -264,24 +310,7 @@ LOG("PROCESSING ATTACH %d", _phost->address);
 		}
 	}
 
-	if(_phost != NULL && _phost->valid)
-	{
-		HID_DIGITAL_IO_Info_TypeDef *dio;
-		dio = USBH_HID_Get_Digital_IO_Info(_phost);
-		if(dio != NULL)
-		{
-LOG("PORT1PIN1: %d", dio->ports[0].direction);
-		}
-		else
-		{
-			HID_KEYBD_Info_TypeDef *kinfo;
-			kinfo = USBH_HID_GetKeybdInfo(_phost);
-			if(kinfo != NULL)
-			{
-LOG("KEYB %d", kinfo->keys[0]);
-			}
-		}
-	}
+
 
 }
 
