@@ -49,6 +49,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_cdc_if.h"
+#include "ring_buffer.h"
 
 /* USER CODE BEGIN INCLUDE */
 
@@ -60,7 +61,7 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-
+extern ringBuffer_type VCP_Buffer;
 /* USER CODE END PV */
 
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
@@ -310,15 +311,26 @@ static int8_t CDC_Control_HS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
   * @param  Len: Number of data received (in bytes)
   * @retval USBD_OK if all operations are OK else USBD_FAIL
   */
-static int8_t CDC_Receive_HS(uint8_t* Buf, uint32_t *Len)
-{
-  /* USER CODE BEGIN 11 */
-  CDC_Transmit_HS(Buf, (uint16_t)*Len);
-  USBD_CDC_SetRxBuffer(&hUsbDeviceHS, &Buf[0]);
-  USBD_CDC_ReceivePacket(&hUsbDeviceHS);
-  return (USBD_OK);
-  /* USER CODE END 11 */
-}
+	uint8_t UserRxBuffer[100] = {0};
+	static int8_t CDC_Receive_HS(uint8_t* Buf, uint32_t *Len)
+	{
+		uint8_t i = 0;
+		/* USER CODE BEGIN 11 */
+
+		//uint32_t length = *Len;
+		/*for(i = 0; i < length; i++)
+		{
+			Ring_Buffer_Add(&VCP_Buffer, Buf[i]);
+		}*/
+
+
+		USBD_CDC_SetRxBuffer(&hUsbDeviceHS, &Buf[0]);
+		USBD_CDC_ReceivePacket(&hUsbDeviceHS);
+		//strlcpy(UserRxBuffer,Buf, (*Len)+1);
+		//CDC_Transmit_HS(Buf, (uint16_t)*Len);
+		return (USBD_OK);
+		/* USER CODE END 11 */
+	}
 
 /**
   * @brief  Data to send over USB IN endpoint are sent over CDC interface

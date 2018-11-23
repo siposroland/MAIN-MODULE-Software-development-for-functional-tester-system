@@ -63,8 +63,9 @@
 #include "usbh_hub.h"
 
 #include "usbh_hid_digital_io.h"
-
 #include "log.h"
+
+#include "ring_buffer.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -89,6 +90,8 @@ static void hub_process();
 /* USER CODE BEGIN 0 */
 uint8_t enabled = 0;
 uint8_t trigger = 0;
+extern uint8_t UserRxBuffer[100];
+ringBuffer_type VCP_Buffer;
 /* USER CODE END 0 */
 
 /**
@@ -98,50 +101,52 @@ uint8_t trigger = 0;
   */
 int main(void)
 {
-  /* USER CODE BEGIN 1 */
+	/* USER CODE BEGIN 1 */
 
-  /* USER CODE END 1 */
+	/* USER CODE END 1 */
 
-  /* MCU Configuration----------------------------------------------------------*/
+	/* MCU Configuration----------------------------------------------------------*/
 
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+	/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+	HAL_Init();
 
-  /* USER CODE BEGIN Init */
+	/* USER CODE BEGIN Init */
 
-  /* USER CODE END Init */
+	/* USER CODE END Init */
 
-  /* Configure the system clock */
-  SystemClock_Config();
+	/* Configure the system clock */
+	SystemClock_Config();
 
-  /* USER CODE BEGIN SysInit */
+	/* USER CODE BEGIN SysInit */
 
-  /* USER CODE END SysInit */
+	/* USER CODE END SysInit */
 
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  //MX_USART3_UART_Init();
-  //MX_USB_HOST_Init();
-  MX_USB_DEVICE_Init();
-  /* USER CODE BEGIN 2 */
-  LOG_INIT(USART3, 115200);
+	/* Initialize all configured peripherals */
+	MX_GPIO_Init();
+	//MX_USART3_UART_Init();
+	//MX_USB_HOST_Init();
+	MX_USB_DEVICE_Init();
+	/* USER CODE BEGIN 2 */
+	LOG_INIT(USART3, 115200);
 
-  	//LOG("\033[2J\033[H");
-  	//LOG(" ");
-  	LOG("APP RUNNING...");
-  	LOG("MCU-ID %08X", DBGMCU->IDCODE);
+	//LOG("\033[2J\033[H");
+	//LOG(" ");
+	LOG("APP RUNNING...");
+	LOG("MCU-ID %08X", DBGMCU->IDCODE);
 
-  	memset(&hUSBHost[0], 0, sizeof(USBH_HandleTypeDef));
+	memset(&hUSBHost[0], 0, sizeof(USBH_HandleTypeDef));
 
-  	hUSBHost[0].valid   = 1;
-  	hUSBHost[0].address = USBH_DEVICE_ADDRESS;
-  	hUSBHost[0].Pipes   = USBH_malloc(sizeof(uint32_t) * USBH_MAX_PIPES_NBR);
+	hUSBHost[0].valid   = 1;
+	hUSBHost[0].address = USBH_DEVICE_ADDRESS;
+	hUSBHost[0].Pipes   = USBH_malloc(sizeof(uint32_t) * USBH_MAX_PIPES_NBR);
 
-  	USBH_Init(&hUSBHost[0], USBH_UserProcess, ID_USB_HOST_FS);
-  	USBH_RegisterClass(&hUSBHost[0], USBH_HID_CLASS);
-  	USBH_RegisterClass(&hUSBHost[0], USBH_HUB_CLASS);
+	USBH_Init(&hUSBHost[0], USBH_UserProcess, ID_USB_HOST_FS);
+	USBH_RegisterClass(&hUSBHost[0], USBH_HID_CLASS);
+	USBH_RegisterClass(&hUSBHost[0], USBH_HUB_CLASS);
 
-  	USBH_Start(&hUSBHost[0]);
+	USBH_Start(&hUSBHost[0]);
+
+	Ring_Buffer_Reset(&VCP_Buffer);
 
   /* USER CODE END 2 */
 
@@ -244,9 +249,26 @@ void hub_process()
 	{
 		current_loop++;
 		volatile USBH_StatusTypeDef status;
+
+		if (UserRxBuffer[0] == 'o' &&
+			UserRxBuffer[1] == 'f' &&
+			UserRxBuffer[2] == 'f')
+		{
+			UserRxBuffer[0] = 0;
+			CDC_Transmit_HS("OFF\r\n",6);
+		}
+		else if (UserRxBuffer[0] == 'o' &&
+			UserRxBuffer[1] == 'k' &&
+			UserRxBuffer[2] == 'e')
+		{
+			UserRxBuffer[0] = 0;
+			CDC_Transmit_HS("OK\r\n",5);
+		}
+
 		if(enabled /*&& dis*/){
 			do
 			{
+
 				static uint8_t cnt = 0;
 				//HAL_Delay(10);
 				uint8_t test[7] = {6,0b11111111,0,0,0,0,0};
@@ -278,7 +300,7 @@ void hub_process()
 		{
 			HID_DIGITAL_IO_Info_TypeDef *dio;
 			dio = USBH_HID_Get_Digital_IO_Info(_phost);
-			if(dio != NULL)
+			/*if(dio != NULL)
 			{
 				HAL_Delay(1);
 				LOG("PORT0PIN0: %d \r\n", dio->ports[0].pins[0]);
@@ -300,7 +322,7 @@ void hub_process()
 					LOG("TICK-: %d", HAL_GetTick());
 					HAL_Delay(1);
 				}
-			}
+			}*/
 		}
 
 		if(current_loop > MAX_HUB_PORTS)
