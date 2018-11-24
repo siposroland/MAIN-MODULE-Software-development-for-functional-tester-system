@@ -317,16 +317,17 @@ static int8_t CDC_Control_HS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 		uint8_t i = 0;
 		/* USER CODE BEGIN 11 */
 
-		//uint32_t length = *Len;
-		/*for(i = 0; i < length; i++)
-		{
-			Ring_Buffer_Add(&VCP_Buffer, Buf[i]);
-		}*/
+
 
 
 		USBD_CDC_SetRxBuffer(&hUsbDeviceHS, &Buf[0]);
 		USBD_CDC_ReceivePacket(&hUsbDeviceHS);
 		//strlcpy(UserRxBuffer,Buf, (*Len)+1);
+		uint32_t length = *Len;
+		for(i = 0; i < length; i++)
+		{
+			Ring_Buffer_Add(&VCP_Buffer, Buf[i]);
+		}
 		//CDC_Transmit_HS(Buf, (uint16_t)*Len);
 		return (USBD_OK);
 		/* USER CODE END 11 */
