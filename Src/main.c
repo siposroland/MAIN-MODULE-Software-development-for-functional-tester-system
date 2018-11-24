@@ -300,18 +300,37 @@ void hub_process()
 		{
 			HID_DIGITAL_IO_Info_TypeDef *dio;
 			dio = USBH_HID_Get_Digital_IO_Info(_phost);
-			/*if(dio != NULL)
+			if(dio != NULL)
 			{
+
+				LOG("P0:%d %d %d %d\r\nP1:%d %d %d %d\r\nP2:%d %d %d %d\r\nP3:%d %d %d %d\r\nP4:%d %d %d %d\r\nP5:%d %d %d %d\r\n",
+						dio->ports[0].pins[0],
+						dio->ports[0].pins[1],
+						dio->ports[0].pins[2],
+						dio->ports[0].pins[3],
+						dio->ports[1].pins[0],
+						dio->ports[1].pins[1],
+						dio->ports[1].pins[2],
+						dio->ports[1].pins[3],
+						dio->ports[2].pins[0],
+						dio->ports[2].pins[1],
+						dio->ports[2].pins[2],
+						dio->ports[2].pins[3],
+						dio->ports[3].pins[0],
+						dio->ports[3].pins[1],
+						dio->ports[3].pins[2],
+						dio->ports[3].pins[3],
+						dio->ports[4].pins[0],
+						dio->ports[4].pins[1],
+						dio->ports[4].pins[2],
+						dio->ports[4].pins[3],
+						dio->ports[5].pins[0],
+						dio->ports[5].pins[1],
+						dio->ports[5].pins[2],
+						dio->ports[5].pins[3]);
 				HAL_Delay(1);
-				LOG("PORT0PIN0: %d \r\n", dio->ports[0].pins[0]);
-				HAL_Delay(1);
-				LOG("PORT0PIN1: %d \r\n", dio->ports[0].pins[1]);
-				HAL_Delay(1);
-				LOG("PORT0PIN2: %d \r\n", dio->ports[0].pins[2]);
-				HAL_Delay(1);
-				LOG("PORT0PIN3: %d \r\n", dio->ports[0].pins[3]);
-				HAL_Delay(1);
-				if (dio->ports[0].pins[0] == 0)
+
+				/*if (dio->ports[0].pins[0] == 0)
 				{
 					LOG("TICK+: %d", HAL_GetTick());
 					HAL_Delay(1);
