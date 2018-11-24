@@ -96,7 +96,7 @@ uint8_t Ring_Buffer_Search_Frame(ringBuffer_type *ringBuffer, uint8_t *command)
 					return FALSE;
 				}*/
 				// handle, when locate the END OF FRAME character
-				if(ringBuffer->data[tempIdx] == '\n')
+				if(ringBuffer->data[tempIdx] == '$')
 				{
 					// copy frame to the process buffer (named in this function: 'command')
 					i = 0;
@@ -117,7 +117,7 @@ uint8_t Ring_Buffer_Search_Frame(ringBuffer_type *ringBuffer, uint8_t *command)
 					// step the reader index
 					ringBuffer->rdIdx = ringBuffer->rdStart;
 					// enable to begin the process
-					return TRUE;
+					return i;
 				}
 				// iteration for the searching of END OF FRAME character
 				else

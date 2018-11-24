@@ -51,7 +51,7 @@ void Ring_Buffer_Add(ringBuffer_type* ringBuffer, uint8_t data);
 
 /*! \brief Search for the next frame in the ring buffer and copy to the process buffer
  * \param ringBuffer struct pointer, 8bit command data pointer
- * \return find result (TRUE or FALSE)
+ * \return find result (TRUE -> then return the length of the command or FALSE)
  * \note Called from main.c - main function -> before start the UART data processes
  */
 uint8_t Ring_Buffer_Search_Frame(ringBuffer_type *ringBuffer, uint8_t *command);
