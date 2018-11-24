@@ -247,9 +247,11 @@ void hub_process()
 
 	while(1)
 	{
+		uint8_t UserRxBuffer[100];
+		uint8_t UserRxLength;
 		current_loop++;
 		volatile USBH_StatusTypeDef status;
-
+		/*
 		if (UserRxBuffer[0] == 'o' &&
 			UserRxBuffer[1] == 'f' &&
 			UserRxBuffer[2] == 'f')
@@ -263,6 +265,37 @@ void hub_process()
 		{
 			UserRxBuffer[0] = 0;
 			CDC_Transmit_HS("OK\r\n",5);
+		}*/
+		UserRxLength = Ring_Buffer_Search_Frame(&VCP_Buffer, UserRxBuffer);
+		if (UserRxLength != 0)
+		{
+			if (UserRxBuffer[1] == 'D' && UserRxBuffer[2] == 't' && UserRxBuffer[3] == 'e' && UserRxBuffer[4] == 's' && UserRxBuffer[5] == 't')
+			{
+				do
+				{
+					static uint8_t cnt = 0;
+					//HAL_Delay(10);
+					uint8_t test[7] = {6,0b11111111,0,0,0,0,0};
+					status = USBH_HID_SetReport(&hUSBHost[0],cnt,0,test,7);
+					//LOG("CNT: %d", cnt);
+				}
+				while(status != USBH_OK);
+				CDC_Transmit_HS( "CHANGE_OK\r\n", 12);
+				HAL_Delay(1);
+			}
+			else if (UserRxBuffer[1] == 'D' && UserRxBuffer[2] == 't' && UserRxBuffer[3] == 'r' && UserRxBuffer[4] == 'i' && UserRxBuffer[5] == 'g')
+			{
+				do
+				{
+					static uint8_t cnt = 0;
+					uint8_t test[2] = {1, 0xfe};
+					status = USBH_HID_SetReport(&hUSBHost[0],cnt,0,test,2);
+				}
+				while(status != USBH_OK);
+				enabled = 0;
+			}
+			CDC_Transmit_HS( "TRIGGER_OK\r\n", 12);
+			HAL_Delay(1);
 		}
 
 		if(enabled /*&& dis*/){
@@ -340,8 +373,8 @@ void hub_process()
 				{
 					LOG("TICK-: %d", HAL_GetTick());
 					HAL_Delay(1);
-				}
-			}*/
+				}*/
+			}
 		}
 
 		if(current_loop > MAX_HUB_PORTS)
