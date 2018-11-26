@@ -225,6 +225,19 @@ void hub_process()
 			cmd_trigger_flag = 0;
 		}
 
+		if(cmd_trigger_event_flag){
+			do
+			{
+				static uint8_t cnt = 0;
+				trig_event_buffer[0] = 5;
+				status = USBH_HID_SetReport(&hUSBHost[0],cnt,0,trig_event_buffer,6);
+			}
+			while(status != USBH_OK);
+			CDC_Transmit_HS( "TRIGGER_EVENT_OK\r\n", 12);
+			HAL_Delay(1);
+			cmd_trigger_event_flag = 0;
+		}
+
 		if(_phost != NULL && _phost->valid)
 		{
 			HID_DIGITAL_IO_Info_TypeDef *dio;

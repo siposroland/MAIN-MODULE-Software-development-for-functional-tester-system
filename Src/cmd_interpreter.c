@@ -25,6 +25,7 @@ uint8_t change_buffer[7] = {0};
 uint8_t trig_event_buffer[6] = {0};
 uint8_t cmd_change_flag = 0;
 uint8_t cmd_trigger_flag = 0;
+uint8_t cmd_trigger_event_flag = 0;
 /* == file-scope (static) variables ============================================= */
 
 /* == file-scope (static) function prototypes =================================== */
@@ -58,7 +59,7 @@ uint8_t Command_Interpreter_Digital(uint8_t* cmd)
 	}
 	else if (cmd[idx+1] == 'T' && cmd[idx+2] == 'R' && cmd[idx+3] == 'E' && cmd[idx+4] == 'V')
 	{
-		return process_change_msg(cmd, idx+4);
+		return process_trigger_event_msg(cmd, idx+4);
 	}
 	else
 	{
@@ -195,20 +196,28 @@ uint8_t process_trigger_event_msg(uint8_t* cmd, uint8_t idx)
 	{
 		return CMD_OK;
 	}
+	else
+	{
+		// Add ENABLE bit
+		trig_event_buffer[1] |= 1;
+	}
 
 	//  ********** STEP 2 **********
 	// Read number of ANDs (ASCII conversion) (A)
 	num_of_ANDs = (cmd[idx] - 48);
-	trig_event_buffer[1] |= (num_of_ANDs << 6);
+	trig_event_buffer[1] |= (num_of_ANDs << 5);
 
 	//  ********** STEP3 **********
 	// Read parameter arguments
-	for (i = 0; i < num_of_ANDs; i++)
+	for (i = 0; i < num_of_ANDs + 1; i++)
 	{
 		trig_event_buffer[i + 2] |= (cmd[++idx] - 48);
 		trig_event_buffer[i + 2] |= ((cmd[++idx] - 48) << 3);
 		trig_event_buffer[i + 2] |= ((cmd[++idx] - 48) << 6);
 	}
+
+	cmd_trigger_event_flag = 1;
+
 	return CMD_OK;
 }
 

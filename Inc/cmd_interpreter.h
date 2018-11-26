@@ -40,8 +40,10 @@ typedef enum{
 
 /* == global variables ========================================================== */
 extern uint8_t change_buffer[7];
+extern uint8_t trig_event_buffer[6];
 extern uint8_t cmd_change_flag;
 extern uint8_t cmd_trigger_flag;
+extern uint8_t cmd_trigger_event_flag;
 /* == public function prototypes ============================================== */
 /*! \brief Reset the chosen 'ringBuffer'
  * \param ringBuffer struct pointer
@@ -77,6 +79,13 @@ uint8_t process_change_msg(uint8_t* cmd, uint8_t idx);
  * \note Called from UART.c - UART_Init(...) function
  */
 uint8_t process_trigger_msg(uint8_t* cmd, uint8_t idx);
+
+/*! \brief Reset the chosen 'ringBuffer'
+ * \param ringBuffer struct pointer
+ * \return void
+ * \note Called from UART.c - UART_Init(...) function
+ */
+uint8_t process_trigger_event_msg(uint8_t* cmd, uint8_t idx);
 
 
 #endif /* CMD_INTERPRETER_H_ */
