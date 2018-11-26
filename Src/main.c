@@ -66,6 +66,7 @@
 #include "log.h"
 
 #include "ring_buffer.h"
+#include "cmd_interpreter.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -165,71 +166,7 @@ int main(void)
 
 }
 
-/**
-  * @brief System Clock Configuration
-  * @retval None
-  */
-void SystemClock_Config(void)
-{
 
-  RCC_OscInitTypeDef RCC_OscInitStruct;
-  RCC_ClkInitTypeDef RCC_ClkInitStruct;
-  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct;
-
-    /**Configure the main internal regulator output voltage 
-    */
-  __HAL_RCC_PWR_CLK_ENABLE();
-
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
-
-    /**Initializes the CPU, AHB and APB busses clocks 
-    */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 4;
-  RCC_OscInitStruct.PLL.PLLN = 168;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 7;
-  RCC_OscInitStruct.PLL.PLLR = 2;
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-    /**Initializes the CPU, AHB and APB busses clocks 
-    */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
-
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_CLK48;
-  PeriphClkInitStruct.Clk48ClockSelection = RCC_CLK48CLKSOURCE_PLLQ;
-  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-    /**Configure the Systick interrupt time 
-    */
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
-
-    /**Configure the Systick 
-    */
-  HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
-
-  /* SysTick_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
-}
 
 /* USER CODE BEGIN 4 */
 void hub_process()
@@ -251,129 +188,87 @@ void hub_process()
 		uint8_t UserRxLength;
 		current_loop++;
 		volatile USBH_StatusTypeDef status;
-		/*
-		if (UserRxBuffer[0] == 'o' &&
-			UserRxBuffer[1] == 'f' &&
-			UserRxBuffer[2] == 'f')
-		{
-			UserRxBuffer[0] = 0;
-			CDC_Transmit_HS("OFF\r\n",6);
-		}
-		else if (UserRxBuffer[0] == 'o' &&
-			UserRxBuffer[1] == 'k' &&
-			UserRxBuffer[2] == 'e')
-		{
-			UserRxBuffer[0] = 0;
-			CDC_Transmit_HS("OK\r\n",5);
-		}*/
+
 		UserRxLength = Ring_Buffer_Search_Frame(&VCP_Buffer, UserRxBuffer);
 		if (UserRxLength != 0)
 		{
-			if (UserRxBuffer[1] == 'D' && UserRxBuffer[2] == 't' && UserRxBuffer[3] == 'e' && UserRxBuffer[4] == 's' && UserRxBuffer[5] == 't')
+			if (UserRxBuffer[1] == 'D')
 			{
-				do
-				{
-					static uint8_t cnt = 0;
-					//HAL_Delay(10);
-					uint8_t test[7] = {6,0b11111111,0,0,0,0,0};
-					status = USBH_HID_SetReport(&hUSBHost[0],cnt,0,test,7);
-					//LOG("CNT: %d", cnt);
-				}
-				while(status != USBH_OK);
-				CDC_Transmit_HS( "CHANGE_OK\r\n", 12);
-				HAL_Delay(1);
+				Command_Interpreter_Digital(UserRxBuffer);
 			}
-			else if (UserRxBuffer[1] == 'D' && UserRxBuffer[2] == 't' && UserRxBuffer[3] == 'r' && UserRxBuffer[4] == 'i' && UserRxBuffer[5] == 'g')
+		}
+		if(cmd_change_flag)
+		{
+			do
 			{
-				do
-				{
-					static uint8_t cnt = 0;
-					uint8_t test[2] = {1, 0xfe};
-					status = USBH_HID_SetReport(&hUSBHost[0],cnt,0,test,2);
-				}
-				while(status != USBH_OK);
-				enabled = 0;
+				static uint8_t cnt = 0;
+				change_buffer[0] = 6;
+				//uint8_t test[7] = {6,0b11111111,0,0,0,0,0};
+				status = USBH_HID_SetReport(&hUSBHost[0],cnt,0,change_buffer,7);
 			}
+			while(status != USBH_OK);
+			CDC_Transmit_HS("CHANGE_OK\r\n", 12);
+			HAL_Delay(1);
+			cmd_change_flag = 0;
+		}
+
+		if(cmd_trigger_flag){
+			do
+			{
+				static uint8_t cnt = 0;
+				uint8_t test[2] = {1, 0xfe};
+				status = USBH_HID_SetReport(&hUSBHost[0],cnt,0,test,2);
+			}
+			while(status != USBH_OK);
 			CDC_Transmit_HS( "TRIGGER_OK\r\n", 12);
 			HAL_Delay(1);
+			cmd_trigger_flag = 0;
 		}
 
-		if(enabled /*&& dis*/){
-			do
-			{
-
-				static uint8_t cnt = 0;
-				//HAL_Delay(10);
-				uint8_t test[7] = {6,0b11111111,0,0,0,0,0};
-
-				status = USBH_HID_SetReport(&hUSBHost[0],cnt,0,test,7);
-
-				//LOG("CNT: %d", cnt);
-
-			}
-			while(status != USBH_OK);
-			enabled = 0;
-		}
-		if(trigger /*&& dis*/){
-			do
-			{
-				static uint8_t cnt = 0;
-				//HAL_Delay(10);
-				uint8_t test[2] = {1, 0xfe};
-
-				status = USBH_HID_SetReport(&hUSBHost[0],cnt,0,test,2);
-
-				//LOG("CNT: %d", cnt);
-
-			}
-			while(status != USBH_OK);
-			trigger = 0;
-		}
 		if(_phost != NULL && _phost->valid)
 		{
 			HID_DIGITAL_IO_Info_TypeDef *dio;
 			dio = USBH_HID_Get_Digital_IO_Info(_phost);
 			if(dio != NULL)
 			{
-
-				LOG("P0:%d %d %d %d\r\nP1:%d %d %d %d\r\nP2:%d %d %d %d\r\nP3:%d %d %d %d\r\nP4:%d %d %d %d\r\nP5:%d %d %d %d\r\n",
+				uint8_t dir1 = (dio->ports[0].direction) ? 'O' : 'I';
+				uint8_t dir2 = (dio->ports[1].direction) ? 'O' : 'I';
+				uint8_t dir3 = (dio->ports[2].direction) ? 'O' : 'I';
+				uint8_t dir4 = (dio->ports[3].direction) ? 'O' : 'I';
+				uint8_t dir5 = (dio->ports[4].direction) ? 'O' : 'I';
+				uint8_t dir6 = (dio->ports[5].direction) ? 'O' : 'I';
+				LOG("%c0 %d %d %d %d \r\n%c1 %d %d %d %d \r\n%c2 %d %d %d %d \r\n%c3 %d %d %d %d \r\n%c4 %d %d %d %d \r\n%c5 %d %d %d %d ",
+						dir1,
 						dio->ports[0].pins[0],
 						dio->ports[0].pins[1],
 						dio->ports[0].pins[2],
 						dio->ports[0].pins[3],
+						dir2,
 						dio->ports[1].pins[0],
 						dio->ports[1].pins[1],
 						dio->ports[1].pins[2],
 						dio->ports[1].pins[3],
+						dir3,
 						dio->ports[2].pins[0],
 						dio->ports[2].pins[1],
 						dio->ports[2].pins[2],
 						dio->ports[2].pins[3],
+						dir4,
 						dio->ports[3].pins[0],
 						dio->ports[3].pins[1],
 						dio->ports[3].pins[2],
 						dio->ports[3].pins[3],
+						dir5,
 						dio->ports[4].pins[0],
 						dio->ports[4].pins[1],
 						dio->ports[4].pins[2],
 						dio->ports[4].pins[3],
+						dir6,
 						dio->ports[5].pins[0],
 						dio->ports[5].pins[1],
 						dio->ports[5].pins[2],
 						dio->ports[5].pins[3]);
 				HAL_Delay(1);
-
-				/*if (dio->ports[0].pins[0] == 0)
-				{
-					LOG("TICK+: %d", HAL_GetTick());
-					HAL_Delay(1);
-					LOG("++++++++");
-				}
-				else
-				{
-					LOG("TICK-: %d", HAL_GetTick());
-					HAL_Delay(1);
-				}*/
 			}
 		}
 
@@ -399,6 +294,72 @@ LOG("PROCESSING ATTACH %d \r\n", _phost->address);
 
 
 
+}
+
+/**
+  * @brief System Clock Configuration
+  * @retval None
+  */
+void SystemClock_Config(void)
+{
+
+  RCC_OscInitTypeDef RCC_OscInitStruct;
+  RCC_ClkInitTypeDef RCC_ClkInitStruct;
+  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct;
+
+    /**Configure the main internal regulator output voltage
+    */
+  __HAL_RCC_PWR_CLK_ENABLE();
+
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+
+    /**Initializes the CPU, AHB and APB busses clocks
+    */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLM = 4;
+  RCC_OscInitStruct.PLL.PLLN = 168;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+  RCC_OscInitStruct.PLL.PLLQ = 7;
+  RCC_OscInitStruct.PLL.PLLR = 2;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+    /**Initializes the CPU, AHB and APB busses clocks
+    */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_CLK48;
+  PeriphClkInitStruct.Clk48ClockSelection = RCC_CLK48CLKSOURCE_PLLQ;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+    /**Configure the Systick interrupt time
+    */
+  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+
+    /**Configure the Systick
+    */
+  HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+
+  /* SysTick_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
 
 void USBH_UserProcess (USBH_HandleTypeDef *pHost, uint8_t vId)
