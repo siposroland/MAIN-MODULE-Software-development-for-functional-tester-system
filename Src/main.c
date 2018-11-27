@@ -233,7 +233,7 @@ void hub_process()
 				status = USBH_HID_SetReport(&hUSBHost[0],cnt,0,trig_event_buffer,6);
 			}
 			while(status != USBH_OK);
-			CDC_Transmit_HS( "TRIGGER_EVENT_OK\r\n", 12);
+			CDC_Transmit_HS( "TRIGGER_EVENT_OK\r\n", 19);
 			HAL_Delay(1);
 			cmd_trigger_event_flag = 0;
 		}
