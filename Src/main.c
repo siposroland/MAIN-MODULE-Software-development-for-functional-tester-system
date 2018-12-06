@@ -49,6 +49,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f4xx_hal.h"
+#include "tim.h"
 #include "usart.h"
 #include "usb_device.h"
 #include "usb_host.h"
@@ -128,6 +129,7 @@ int main(void)
 	//MX_USART3_UART_Init();
 	//MX_USB_HOST_Init();
 	MX_USB_DEVICE_Init();
+  MX_TIM3_Init();
 	/* USER CODE BEGIN 2 */
 	LOG_INIT(USART3, 115200);
 
