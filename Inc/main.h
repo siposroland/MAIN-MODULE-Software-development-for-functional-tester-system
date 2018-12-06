@@ -64,8 +64,6 @@
 #define USER_Btn_EXTI_IRQn EXTI15_10_IRQn
 #define MCO_Pin GPIO_PIN_0
 #define MCO_GPIO_Port GPIOH
-#define TIM_SOURCE_Pin GPIO_PIN_6
-#define TIM_SOURCE_GPIO_Port GPIOA
 #define STLK_RX_Pin GPIO_PIN_8
 #define STLK_RX_GPIO_Port GPIOD
 #define STLK_TX_Pin GPIO_PIN_9
