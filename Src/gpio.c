@@ -149,7 +149,18 @@ void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 2 */
+void toggle_clock(void)
+{
 
+	if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_7) == GPIO_PIN_SET)
+	{
+		HAL_GPIO_WritePin(GPIOA,GPIO_PIN_7,GPIO_PIN_RESET);
+	}
+	else
+	{
+		HAL_GPIO_WritePin(GPIOA,GPIO_PIN_7,GPIO_PIN_SET);
+	}
+}
 /* USER CODE END 2 */
 
 /**

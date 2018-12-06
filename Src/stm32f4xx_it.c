@@ -13,6 +13,7 @@
 #include "stm32f4xx.h"
 #include "stm32f4xx_it.h"
 #include "usbh_conf.h"
+#include "gpio.h"
 extern PCD_HandleTypeDef hpcd_USB_OTG_HS;
 extern TIM_HandleTypeDef htim3;
 
@@ -48,7 +49,7 @@ void TIM3_IRQHandler(void)
   /* USER CODE END TIM3_IRQn 0 */
   HAL_TIM_IRQHandler(&htim3);
   /* USER CODE BEGIN TIM3_IRQn 1 */
-
+  void toggle_clock();
   /* USER CODE END TIM3_IRQn 1 */
 }
 
