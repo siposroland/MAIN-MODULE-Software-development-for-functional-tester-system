@@ -354,6 +354,7 @@ HID_DIGITAL_IO_Info_TypeDef *USBH_HID_Get_Digital_IO_Info(USBH_HandleTypeDef *ph
 static USBH_StatusTypeDef USBH_HID_Digital_IO_Decode(USBH_HandleTypeDef *phost)
 {
 //  HID_HandleTypeDef *HID_Handle = (HID_HandleTypeDef *) phost->pActiveClass->pData;
+
 	uint8_t idx = phost->device.current_interface;
 	HID_HandleTypeDef *HID_Handle = phost->USBH_ClassTypeDef_pData[idx];
 

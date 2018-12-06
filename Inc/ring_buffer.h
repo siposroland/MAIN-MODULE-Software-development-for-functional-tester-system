@@ -19,9 +19,11 @@
 /* == #defines ================================================================ */
 
 
-#define RING_BUFFER_SIZE	(256)
+
 
 /* == types ==================================================================== */
+#define RING_BUFFER_SIZE	(256)
+
 typedef struct ringBuffer_struct {
 	uint8_t wrIdx;
 	uint8_t rdIdx;

@@ -63,6 +63,7 @@
 #include "usbh_hub.h"
 
 #include "usbh_hid_digital_io.h"
+#include "usbh_hid_analog_io.h"
 #include "log.h"
 
 #include "ring_buffer.h"
@@ -283,8 +284,14 @@ void hub_process()
 						dio->ports[5].pins[3]);
 				HAL_Delay(1);
 			}
+			HID_ANALOG_IO_Info_TypeDef *aio;
+			aio = USBH_HID_Get_Analog_IO_Info(_phost);
+			if(aio != NULL)
+			{
+				LOG("ANALOG ADC0: %d ADC1: %d", aio->in[0], aio->in[1]);
+				HAL_Delay(1);
+			}
 		}
-
 		if(current_loop > MAX_HUB_PORTS)
 			current_loop = 0;
 

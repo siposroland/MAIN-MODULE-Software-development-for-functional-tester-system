@@ -41,7 +41,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usbh_hid.h"
-
+#include "usbh_hid_analog_io.h"
 
 static USBH_StatusTypeDef USBH_HID_InterfaceInit  (USBH_HandleTypeDef *phost);
 static USBH_StatusTypeDef USBH_HID_InterfaceDeInit  (USBH_HandleTypeDef *phost);
@@ -228,6 +228,13 @@ USBH_UsrLog ("Digital IO module found.");
 					HID_Handle = create_handle(phost);
 					HID_Handle->Init =  USBH_HID_Digital_IO_Init;
 				}
+				else if(pif->bInterfaceClass == 0x03 && pif->bInterfaceSubClass == 0x01 && pif->bInterfaceProtocol == HID_ANALOG_IO_BOOT_CODE)
+				{
+USBH_UsrLog ("Analog IO module found.");
+					HID_Handle = create_handle(phost);
+					HID_Handle->Init =  USBH_HID_Analog_IO_Init;
+				}
+
 
 				if(if_ix > 0 && HID_Handle == NULL)
 				{
@@ -695,6 +702,11 @@ HID_TypeTypeDef USBH_HID_GetDeviceType(USBH_HandleTypeDef *phost)
     {
       type=  HID_DIGITAL_IO;
       return 0x03;
+    }
+    else if(phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].bInterfaceProtocol == HID_ANALOG_IO_BOOT_CODE)
+    {
+      type=  HID_ANALOG_IO;
+      return 0x04;
     }
   }
   return type;
