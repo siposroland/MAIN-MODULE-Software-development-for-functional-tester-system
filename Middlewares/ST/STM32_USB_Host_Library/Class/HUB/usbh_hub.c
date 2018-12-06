@@ -76,7 +76,7 @@ static uint16_t HUB_PwrGood  = 0;
 
 static USBH_StatusTypeDef USBH_HUB_InterfaceInit (USBH_HandleTypeDef *phost)
 {
-	uint8_t interface;
+	volatile uint8_t interface;
 
 	USBH_StatusTypeDef status = USBH_FAIL ;
 	HUB_HandleTypeDef *HUB_Handle;

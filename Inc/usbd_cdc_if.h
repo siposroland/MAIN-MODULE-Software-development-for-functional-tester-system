@@ -134,7 +134,14 @@ extern USBD_CDC_ItfTypeDef USBD_Interface_fops_HS;
 uint8_t CDC_Transmit_HS(uint8_t* Buf, uint16_t Len);
 
 /* USER CODE BEGIN EXPORTED_FUNCTIONS */
-
+/**
+  * @brief  Data to send over USB IN endpoint are sent over CDC interface
+  *         through this function.
+  * @param  Buf: Buffer of data to be sent
+  * @param  Len: Number of data to be sent (in bytes)
+  * @retval Result of the operation: USBD_OK if all operations are OK else USBD_FAIL or USBD_BUSY
+  */
+uint8_t CDC_Transmit_HS(uint8_t* Buf, uint16_t Len);
 /* USER CODE END EXPORTED_FUNCTIONS */
 
 /**

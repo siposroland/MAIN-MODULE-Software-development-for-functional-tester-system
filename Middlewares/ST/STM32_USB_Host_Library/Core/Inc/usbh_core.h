@@ -39,6 +39,7 @@
 #include "usbh_ioreq.h"
 #include "usbh_pipes.h"
 #include "usbh_ctlreq.h"
+
 #define USBH_ADDRESS_DEFAULT                     0
 #define USBH_ADDRESS_ASSIGNED                    1
 #define USBH_MPS_DEFAULT                         0x40
