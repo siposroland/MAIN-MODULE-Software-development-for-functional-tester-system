@@ -646,6 +646,7 @@ USBH_UsrLog("attach %d", idx);
 	pphost->valid = 3;
 
 USBH_UsrLog("HUB stuff ok");
+HAL_GPIO_WritePin(LED_HUB_OK_GPIO_Port, LED_HUB_OK_Pin, GPIO_PIN_SET);
 }
 
 static void debug_port(uint8_t *buff, __IO USB_HUB_PORT_STATUS *info)

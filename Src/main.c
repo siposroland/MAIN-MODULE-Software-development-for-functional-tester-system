@@ -69,6 +69,7 @@
 
 #include "ring_buffer.h"
 #include "cmd_interpreter.h"
+#include <math.h>
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -93,6 +94,7 @@ static void hub_process();
 /* USER CODE BEGIN 0 */
 uint8_t enabled = 0;
 uint8_t trigger = 0;
+uint16_t sinus[200];
 extern uint8_t UserRxBuffer[100];
 ringBuffer_type VCP_Buffer;
 /* USER CODE END 0 */
@@ -105,7 +107,19 @@ ringBuffer_type VCP_Buffer;
 int main(void)
 {
 	/* USER CODE BEGIN 1 */
-
+	uint16_t sample;
+	for (uint8_t i = 0; i < 200; i++)
+	{
+		sample = (uint16_t)rint(( sin(i*2*3.14/200)+1)*1024 );
+		if (sample >= 4095)
+		{
+			sinus[i] = 4095;
+		}
+		else
+		{
+			sinus[i] = sample;
+		}
+	}
 	/* USER CODE END 1 */
 
 	/* MCU Configuration----------------------------------------------------------*/
@@ -357,7 +371,13 @@ void hub_process()
 			aio = USBH_HID_Get_Analog_IO_Info(_phost);
 			if(aio != NULL)
 			{
-				LOG("ANALOG ADC0: %d ADC1: %d", aio->in[0], aio->in[1]);
+				static uint8_t idx = 0;
+				idx ++;
+				LOG("ADC0: %d ADC1: %d DAC0: %d ", rand() % 1200, sinus[idx % 200], sinus[idx+20 % 200]);
+				if (idx > 199)
+				{
+					idx = 0;
+				}
 				HAL_Delay(1);
 			}
 		}

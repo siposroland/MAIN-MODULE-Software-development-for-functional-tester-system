@@ -213,24 +213,28 @@ USBH_UsrLog("HID LEN %d - %d",hid_desc.wItemLength, phost->device.current_interf
 				if(pif->bInterfaceClass == 0x03 && pif->bInterfaceSubClass == 0x01 && pif->bInterfaceProtocol == HID_KEYBRD_BOOT_CODE)
 				{
 USBH_UsrLog ("KeyBoard found.");
+				HAL_GPIO_WritePin(LED_HUB_3_GPIO_Port, LED_HUB_3_Pin, GPIO_PIN_SET);
 					HID_Handle = create_handle(phost);
 					HID_Handle->Init =  USBH_HID_KeybdInit;
 				}
 				else if(pif->bInterfaceClass == 0x03 && pif->bInterfaceSubClass == 0x01 && pif->bInterfaceProtocol == HID_MOUSE_BOOT_CODE)
 				{
 USBH_UsrLog ("Mouses found.");
+					HAL_GPIO_WritePin(LED_HUB_2_GPIO_Port, LED_HUB_2_Pin, GPIO_PIN_SET);
 					HID_Handle = create_handle(phost);
 					HID_Handle->Init =  USBH_HID_MouseInit;
 				}
 				else if(pif->bInterfaceClass == 0x03 && pif->bInterfaceSubClass == 0x01 && pif->bInterfaceProtocol == HID_DIGITAL_IO_BOOT_CODE)
 				{
 USBH_UsrLog ("Digital IO module found.");
+				HAL_GPIO_WritePin(LED_HUB_1_GPIO_Port, LED_HUB_1_Pin, GPIO_PIN_SET);
 					HID_Handle = create_handle(phost);
 					HID_Handle->Init =  USBH_HID_Digital_IO_Init;
 				}
 				else if(pif->bInterfaceClass == 0x03 && pif->bInterfaceSubClass == 0x01 && pif->bInterfaceProtocol == HID_ANALOG_IO_BOOT_CODE)
 				{
 USBH_UsrLog ("Analog IO module found.");
+					HAL_GPIO_WritePin(LED_HUB_0_GPIO_Port, LED_HUB_0_Pin, GPIO_PIN_SET);
 					HID_Handle = create_handle(phost);
 					HID_Handle->Init =  USBH_HID_Analog_IO_Init;
 				}
