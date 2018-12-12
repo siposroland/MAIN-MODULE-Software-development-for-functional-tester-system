@@ -174,6 +174,14 @@ typedef  struct  _HID_ReportData
 } 
 HID_ReportDataTypeDef;
 
+typedef struct _STATE_INDICATORS
+{
+	uint8_t hub_led;
+	uint8_t hub_port_led[4];
+}STATE_LED_TypeDef;
+
+extern STATE_LED_TypeDef state_leds;
+
 typedef  struct  _HID_ReportIDTypeDef {
     uint8_t  Size;         /* Report size return by the device id            */
     uint8_t  ReportID;     /* Report Id                                      */

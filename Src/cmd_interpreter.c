@@ -12,6 +12,7 @@
 
 /* == include files ========================================================== */
 #include "cmd_interpreter.h"
+#include "tim.h"
 /* == #defines ================================================================ */
 
 /* == types ==================================================================== */
@@ -60,6 +61,40 @@ uint8_t Command_Interpreter_Digital(uint8_t* cmd)
 	else if (cmd[idx+1] == 'T' && cmd[idx+2] == 'R' && cmd[idx+3] == 'E' && cmd[idx+4] == 'V')
 	{
 		return process_trigger_event_msg(cmd, idx+4);
+	}
+	else
+	{
+		return CMD_ERROR;
+	}
+}
+
+/*! \brief Reset the chosen 'ringBuffer'
+ * \param ringBuffer struct pointer
+ * \return void
+ * \note Called from UART.c - UART_Init(...) function
+ */
+uint8_t Command_Interpreter_Main(uint8_t* cmd)
+{
+	uint8_t idx = 1;
+	if (cmd[idx+1] == 'S' && cmd[idx+2] == 'Y' && cmd[idx+3] == 'N' && cmd[idx+4] == 'C')
+	{
+		// TODO Sync
+		return process_store_msg(cmd, idx+4);
+	}
+	else if (cmd[idx+1] == 'D' && cmd[idx+2] == 'L' && cmd[idx+3] == 'Y' && cmd[idx+4] == 'R')
+	{
+		// TODO Response
+		return process_null_msg(cmd, idx+4);
+	}
+	else if (cmd[idx+1] == 'T' && cmd[idx+2] == 'I' && cmd[idx+3] == 'M' && cmd[idx+4] == 'E')
+	{
+		HAL_TIM_Base_Start_IT(&htim3);
+		return CMD_OK;
+	}
+	else if (cmd[idx+1] == 'T' && cmd[idx+2] == 'I' && cmd[idx+3] == 'M' && cmd[idx+4] == 'D')
+	{
+		HAL_TIM_Base_Stop_IT(&htim3);
+		return CMD_OK;
 	}
 	else
 	{

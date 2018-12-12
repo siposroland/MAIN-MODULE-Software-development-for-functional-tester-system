@@ -166,8 +166,11 @@ int main(void)
 
 	Ring_Buffer_Reset(&VCP_Buffer);
 
-	HAL_TIM_Base_Start_IT(&htim3);
-
+	state_leds.hub_led = 0;
+	state_leds.hub_port_led[0] = 0;
+	state_leds.hub_port_led[1] = 0;
+	state_leds.hub_port_led[2] = 0;
+	state_leds.hub_port_led[3] = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -367,6 +370,11 @@ void hub_process()
 						dio->ports[5].pins[3]);
 				HAL_Delay(1);
 			}
+			else
+			{
+				state_leds.hub_port_led[3] = 0;
+				HAL_GPIO_WritePin(LED_HUB_0_GPIO_Port, LED_HUB_0_Pin, GPIO_PIN_RESET);
+			}
 			HID_ANALOG_IO_Info_TypeDef *aio;
 			aio = USBH_HID_Get_Analog_IO_Info(_phost);
 			if(aio != NULL)
@@ -379,6 +387,11 @@ void hub_process()
 					idx = 0;
 				}
 				HAL_Delay(1);
+			}
+			else
+			{
+				state_leds.hub_port_led[2] = 0;
+				HAL_GPIO_WritePin(LED_HUB_1_GPIO_Port, LED_HUB_1_Pin, GPIO_PIN_RESET);
 			}
 		}
 		if(current_loop > MAX_HUB_PORTS)

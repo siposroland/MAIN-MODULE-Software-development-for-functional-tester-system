@@ -28,6 +28,7 @@
 #include "usbh_hub.h"
 #include "usbh_hid.h"
 
+
 //#include "usbh_msc.h"
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx_hal_hcd.h"
@@ -142,6 +143,8 @@ USBH_UsrLog ("device POLL %d, LEN %d", HUB_Handle->poll, HUB_Handle->length);
 static USBH_StatusTypeDef USBH_HUB_InterfaceDeInit (USBH_HandleTypeDef *phost )
 {
 	USBH_UsrLog("USBH_HUB_InterfaceDeInit %d", phost->address);
+	state_leds.hub_led = 0;
+	HAL_GPIO_WritePin(LED_HUB_OK_GPIO_Port, LED_HUB_OK_GPIO_Port, GPIO_PIN_RESET);
 
 	HUB_HandleTypeDef *HUB_Handle = phost->USBH_ClassTypeDef_pData[0];
 
@@ -195,6 +198,8 @@ static USBH_StatusTypeDef USBH_HUB_ClassRequest(USBH_HandleTypeDef *phost)
     		phost->busy = 0;
     		USBH_UsrLog("%d HUB PORTS ENABLED", HUB_NumPorts);
     		USBH_UsrLog("=============================================");
+			HAL_GPIO_WritePin(LED_HUB_OK_GPIO_Port, LED_HUB_OK_Pin, GPIO_PIN_SET);
+    		state_leds.hub_led = 1;
     		status = USBH_OK;
     		break;
     }

@@ -30,6 +30,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "usbh_core.h"
+#include "main.h"
 
 #define USB_HUB_CLASS     					 0x09
 #define HUB_MIN_POLL	  					 200
