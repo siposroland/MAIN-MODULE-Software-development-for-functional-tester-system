@@ -14,21 +14,6 @@
 #define LOGGER_MAXLEN 	250
 #define LOGGER_TIMEOUT	10
 
-static UART_HandleTypeDef hUartHandle;
-
-uint8_t LOG_INIT(USART_TypeDef *usart, uint32_t baudrate)
-{
-	hUartHandle.Instance          = usart;
-	hUartHandle.Init.BaudRate     = baudrate;
-	hUartHandle.Init.WordLength   = UART_WORDLENGTH_8B;
-	hUartHandle.Init.StopBits     = UART_STOPBITS_1;
-	hUartHandle.Init.Parity       = UART_PARITY_NONE;
-	hUartHandle.Init.HwFlowCtl    = UART_HWCONTROL_NONE;
-	hUartHandle.Init.Mode         = UART_MODE_TX_RX;
-	hUartHandle.Init.OverSampling = UART_OVERSAMPLING_8;
-
-	return (HAL_UART_Init(&hUartHandle) == HAL_OK);
-}
 
 void write_string(const char *data)
 {

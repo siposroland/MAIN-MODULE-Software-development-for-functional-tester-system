@@ -49,8 +49,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f4xx_hal.h"
+#include "rtc.h"
 #include "tim.h"
-#include "usart.h"
 #include "usb_device.h"
 #include "usb_host.h"
 #include "gpio.h"
@@ -97,6 +97,7 @@ uint8_t trigger = 0;
 uint16_t sinus[200];
 extern uint8_t UserRxBuffer[100];
 ringBuffer_type VCP_Buffer;
+uint8_t sync_flag = 0;
 /* USER CODE END 0 */
 
 /**
@@ -143,9 +144,10 @@ int main(void)
 	//MX_USART3_UART_Init();
 	//MX_USB_HOST_Init();
 	MX_USB_DEVICE_Init();
-  MX_TIM3_Init();
+	MX_TIM3_Init();
+	MX_RTC_Init();
 	/* USER CODE BEGIN 2 */
-	LOG_INIT(USART3, 115200);
+	//LOG_INIT(USART3, 115200);
 
 	//LOG("\033[2J\033[H");
 	//LOG(" ");
@@ -207,8 +209,10 @@ void SystemClock_Config(void)
 
     /**Initializes the CPU, AHB and APB busses clocks 
     */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
+  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 4;
@@ -235,7 +239,8 @@ void SystemClock_Config(void)
     _Error_Handler(__FILE__, __LINE__);
   }
 
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_CLK48;
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_RTC|RCC_PERIPHCLK_CLK48;
+  PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
   PeriphClkInitStruct.Clk48ClockSelection = RCC_CLK48CLKSOURCE_PLLQ;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
@@ -253,7 +258,6 @@ void SystemClock_Config(void)
   /* SysTick_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
-
 
 /* USER CODE BEGIN 4 */
 void hub_process()
@@ -282,6 +286,10 @@ void hub_process()
 			if (UserRxBuffer[1] == 'D')
 			{
 				Command_Interpreter_Digital(UserRxBuffer);
+			}
+			else if (UserRxBuffer[1] == 'M')
+			{
+				Command_Interpreter_Main(UserRxBuffer);
 			}
 		}
 		if(cmd_change_flag)
@@ -325,7 +333,7 @@ void hub_process()
 			cmd_trigger_event_flag = 0;
 		}
 
-		if(_phost != NULL && _phost->valid)
+		if(_phost != NULL && _phost->valid  && (sync_flag == 1))
 		{
 			HID_DIGITAL_IO_Info_TypeDef *dio;
 			dio = USBH_HID_Get_Digital_IO_Info(_phost);

@@ -13,6 +13,7 @@
 /* == include files ========================================================== */
 #include "cmd_interpreter.h"
 #include "tim.h"
+#include "usbh_hid.h"
 /* == #defines ================================================================ */
 
 /* == types ==================================================================== */
@@ -20,13 +21,19 @@
 /* == constants ================================================================= */
 
 /* == global constants ========================================================== */
-
+RTC_DateTypeDef date_stamp[4];
+RTC_TimeTypeDef time_stamp[4];
+uint16_t delay_ms = 0;
 /* == global variables ========================================================== */
 uint8_t change_buffer[7] = {0};
 uint8_t trig_event_buffer[6] = {0};
 uint8_t cmd_change_flag = 0;
 uint8_t cmd_trigger_flag = 0;
 uint8_t cmd_trigger_event_flag = 0;
+extern uint8_t sync_flag;
+extern RTC_HandleTypeDef hrtc;
+extern STATE_LED_TypeDef state_leds;
+RTC_HandleTypeDef hrtc;
 /* == file-scope (static) variables ============================================= */
 
 /* == file-scope (static) function prototypes =================================== */
@@ -78,13 +85,40 @@ uint8_t Command_Interpreter_Main(uint8_t* cmd)
 	uint8_t idx = 1;
 	if (cmd[idx+1] == 'S' && cmd[idx+2] == 'Y' && cmd[idx+3] == 'N' && cmd[idx+4] == 'C')
 	{
-		// TODO Sync
-		return process_store_msg(cmd, idx+4);
+		sync_flag = 1;
+		HAL_RTC_GetDate(&hrtc,&date_stamp[0],RTC_FORMAT_BIN);
+		HAL_RTC_GetTime(&hrtc,&time_stamp[0],RTC_FORMAT_BIN);
+		date_stamp[1].Year = cmd[idx+5];
+		date_stamp[1].Month = cmd[idx+6];
+		date_stamp[1].Date = cmd[idx+7];
+		time_stamp[1].Hours = cmd[idx+8];
+		time_stamp[1].Minutes = cmd[idx+9];
+		time_stamp[1].Seconds = cmd[idx+10];
+		time_stamp[1].SubSeconds = cmd[idx+11] + (cmd[idx+12] << 8);
+
+		HAL_RTC_SetDate(&hrtc,&date_stamp[1],RTC_FORMAT_BIN);
+		HAL_RTC_SetTime(&hrtc,&time_stamp[1],RTC_FORMAT_BIN);
+		return CMD_OK;
 	}
 	else if (cmd[idx+1] == 'D' && cmd[idx+2] == 'L' && cmd[idx+3] == 'Y' && cmd[idx+4] == 'R')
 	{
-		// TODO Response
-		return process_null_msg(cmd, idx+4);
+		sync_flag = 0;
+		HAL_RTC_GetDate(&hrtc,&date_stamp[2],RTC_FORMAT_BIN);
+		HAL_RTC_GetTime(&hrtc,&time_stamp[2],RTC_FORMAT_BIN);
+		date_stamp[3].Year = cmd[idx+5];
+		date_stamp[3].Month = cmd[idx+6];
+		date_stamp[3].Date = cmd[idx+7];
+		time_stamp[3].Hours = cmd[idx+8];
+		time_stamp[3].Minutes = cmd[idx+9];
+		time_stamp[3].Seconds = cmd[idx+10];
+		time_stamp[3].SubSeconds = cmd[idx+11] + (cmd[idx+12] << 8);
+
+		// TODO add carry
+		delay_ms = ((time_stamp[1].SubSeconds - time_stamp[0].SubSeconds)-(time_stamp[3].SubSeconds - time_stamp[2].SubSeconds)) / 2;
+		time_stamp[2].SubSeconds = ((time_stamp[2].SubSeconds + (2*delay_ms)) % 999);
+		HAL_RTC_SetTime(&hrtc,&time_stamp[2],RTC_FORMAT_BIN);
+		HAL_RTC_SetDate(&hrtc,&date_stamp[2],RTC_FORMAT_BIN);
+		return CMD_OK;
 	}
 	else if (cmd[idx+1] == 'T' && cmd[idx+2] == 'I' && cmd[idx+3] == 'M' && cmd[idx+4] == 'E')
 	{
@@ -94,6 +128,54 @@ uint8_t Command_Interpreter_Main(uint8_t* cmd)
 	else if (cmd[idx+1] == 'T' && cmd[idx+2] == 'I' && cmd[idx+3] == 'M' && cmd[idx+4] == 'D')
 	{
 		HAL_TIM_Base_Stop_IT(&htim3);
+		return CMD_OK;
+	}
+	else if (cmd[idx+1] == 'H' && cmd[idx+2] == 'U' && cmd[idx+3] == 'B' && cmd[idx+4] == ' ')
+	{
+		LOG("HUB%d",state_leds.hub_led);
+		return CMD_OK;
+	}
+	else if (cmd[idx+1] == 'D' && cmd[idx+2] == 'I' && cmd[idx+3] == 'O' && cmd[idx+4] == ' ')
+	{
+		LOG("DIO%d",state_leds.hub_port_led[3]);
+		return CMD_OK;
+	}
+	else if (cmd[idx+1] == 'A' && cmd[idx+2] == 'I' && cmd[idx+3] == 'O' && cmd[idx+4] == ' ')
+	{
+		LOG("AIO%d",state_leds.hub_port_led[2]);
+		return CMD_OK;
+	}
+	else if (cmd[idx+1] == 'G' && cmd[idx+2] == 'E' && cmd[idx+3] == 'T' && cmd[idx+4] == 'T')
+	{
+		RTC_DateTypeDef date_temp;
+		RTC_TimeTypeDef time_temp;
+
+		uint8_t Time[3];
+		uint16_t MSec;
+		uint8_t Date[];
+
+		HAL_RTC_GetDate(&hrtc,&date_temp,RTC_FORMAT_BIN);
+		HAL_RTC_GetTime(&hrtc,&time_temp,RTC_FORMAT_BIN);
+
+		Time[0] = time_temp.Hours;
+		Time[1] = time_temp.Minutes;
+		Time[2] = time_temp.Seconds;
+
+		Date[0] = date_temp.Year;
+		Date[1] = date_temp.Month;
+		Date[2] = date_temp.Date;
+
+		MSec = time_temp.SubSeconds;
+
+		LOG("TIME %d %d %d %d %d %d %d \n",
+				Date[0],
+				Date[1],
+				Date[2],
+				Time[0],
+				Time[1],
+				Time[2],
+				MSec);
+
 		return CMD_OK;
 	}
 	else
