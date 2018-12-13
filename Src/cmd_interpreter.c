@@ -152,7 +152,7 @@ uint8_t Command_Interpreter_Main(uint8_t* cmd)
 
 		uint8_t Time[3];
 		uint16_t MSec;
-		uint8_t Date[];
+		uint8_t Date[3];
 
 		HAL_RTC_GetDate(&hrtc,&date_temp,RTC_FORMAT_BIN);
 		HAL_RTC_GetTime(&hrtc,&time_temp,RTC_FORMAT_BIN);
