@@ -389,7 +389,9 @@ void hub_process()
 			{
 				static uint8_t idx = 0;
 				idx ++;
-				LOG("ADC0: %d ADC1: %d DAC0: %d ", rand() % 1200, sinus[idx % 200], sinus[idx+20 % 200]);
+				// for test
+				//LOG("ADC0: %d ADC1: %d DAC0: %d ", rand() % 1200, sinus[idx % 200], sinus[idx+20 % 200]);
+				LOG("ADC0: %d ADC1: %d DAC0: %d ", aio->in[0], aio->in[1], aio->out[0]);
 				if (idx > 199)
 				{
 					idx = 0;

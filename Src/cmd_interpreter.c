@@ -152,7 +152,7 @@ uint8_t Command_Interpreter_Main(uint8_t* cmd)
 
 		uint8_t Time[3];
 		uint16_t MSec;
-		uint8_t Date[3];
+		uint8_t Date[];
 
 		HAL_RTC_GetDate(&hrtc,&date_temp,RTC_FORMAT_BIN);
 		HAL_RTC_GetTime(&hrtc,&time_temp,RTC_FORMAT_BIN);
@@ -167,7 +167,7 @@ uint8_t Command_Interpreter_Main(uint8_t* cmd)
 
 		MSec = time_temp.SubSeconds;
 
-		LOG("TIME %d %d %d %d %d %d %d \n",
+		LOG("TIME,%d,%d,%d,%d,%d,%d,%d,\n",
 				Date[0],
 				Date[1],
 				Date[2],
@@ -175,7 +175,6 @@ uint8_t Command_Interpreter_Main(uint8_t* cmd)
 				Time[1],
 				Time[2],
 				MSec);
-
 		return CMD_OK;
 	}
 	else
