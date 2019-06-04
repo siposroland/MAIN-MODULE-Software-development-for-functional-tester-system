@@ -296,6 +296,8 @@ HID_KEYBD_Info_TypeDef;
 USBH_StatusTypeDef USBH_HID_KeybdInit(USBH_HandleTypeDef *phost);
 HID_KEYBD_Info_TypeDef *USBH_HID_GetKeybdInfo(USBH_HandleTypeDef *phost);
 uint8_t USBH_HID_GetASCIICode(HID_KEYBD_Info_TypeDef *info);
+//USBH_StatusTypeDef USBH_HID_Keyb_DecodeData(USBH_HandleTypeDef *phost, HID_Report_ItemTypedef *parser_data, uint8_t *pData, uint16_t length);
+
 
 /**
   * @}

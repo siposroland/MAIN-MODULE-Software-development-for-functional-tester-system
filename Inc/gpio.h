@@ -69,7 +69,7 @@
 void MX_GPIO_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+void toggle_clock(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
